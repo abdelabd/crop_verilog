@@ -22,19 +22,18 @@ module crop_filter #(
     localparam IMG_ROW_BITHWIDTH = $clog2(IN_ROWS+1);
     reg [IMG_ROW_BITHWIDTH - 1: 0] y, next_y;
 
+    // Sequential logic
     always @(posedge clk) begin
 
-        if (reset) begin // Reset to (next_x, next_y) = (0, 0) and out_valid=0
+        if (reset) begin // Reset all the counters to 0 
             next_x <= 0;
             next_y <= 0;
             x <= 0;
             y <= 0;
-            out_valid <= 1'b0;
         end 
         
-        else if (in_valid && out_ready) begin
+        else if (in_valid && out_ready) begin // if in_vald&&out_ready then increment the counters
 
-            // determine x and y of incoming pixel
             x <= next_x;
             y <= next_y;
             if (x == IN_COLS-1) begin
@@ -45,20 +44,35 @@ module crop_filter #(
                 next_y <= y;
             end
 
-            // if it passes the crop-filter, send the pixel out
+        end
+
+    end
+
+    // Combinational logic
+    always @(*) begin
+
+        if (in_valid&&out_ready) begin
+
+            // if counters pass the crop-filter, send the pixel out
             if((y >= Y_1) && (y < Y_1+OUT_ROWS) && (x >= X_1) && (x < X_1+OUT_COLS)) begin 
-                pixel_out <= pixel_in;
-                out_valid <= 1'b1;
+                pixel_out = pixel_in;
+                out_valid = 1'b1;
             end
 
             // else, don't send the pixel
             else begin
-                out_valid <= 1'b0;
+                out_valid = 1'b0;
+                pixel_out = 'bX; // Don't care
             end
-
-                
-        end 
         
+        end
+
+        // else, don't send the pixel
+        else begin
+            out_valid = 1'b0;
+            pixel_out = 'bX; // Don't care
+        end
+
     end
 
 endmodule
