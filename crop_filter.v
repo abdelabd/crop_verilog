@@ -1,4 +1,5 @@
 module crop_filter #(
+    parameter PIXEL_BIT_WIDTH = 12,
     parameter IN_ROWS = 40;
     parameter IN_COLS = 40;
     parameter OUT_ROWS = 20;
@@ -8,8 +9,8 @@ module crop_filter #(
 	(clk, reset, pixel_in, pixel_out, in_valid, out_ready, out_valid);
 
     input wire clk, reset;
-    input wire [11:0] pixel_in;
-    output reg [11:0] pixel_out;
+    input wire [PIXEL_BIT_WIDTH-1:0] pixel_in; 
+    output reg [PIXEL_BIT_WIDTH-1:0] pixel_out;
     input wire in_valid;
     // output logic in_ready; // No real need for this, the camera grabber spits out pixels and it's our job to catch them
     input wire out_ready;
