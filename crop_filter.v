@@ -27,6 +27,8 @@ module crop_filter #(
         if (reset) begin // Reset to (next_x, next_y) = (0, 0) and out_valid=0
             next_x <= 0;
             next_y <= 0;
+            x <= 0;
+            y <= 0;
             out_valid <= 1'b0;
         end 
         
