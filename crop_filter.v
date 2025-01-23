@@ -1,10 +1,10 @@
 module crop_filter #(
     parameter PIXEL_BIT_WIDTH = 12,
-    parameter IN_ROWS = 40;
-    parameter IN_COLS = 40;
-    parameter OUT_ROWS = 20;
-    parameter OUT_COLS = 20;
-    parameter Y_1 = 10;
+    parameter IN_ROWS = 40,
+    parameter IN_COLS = 40,
+    parameter OUT_ROWS = 20,
+    parameter OUT_COLS = 20,
+    parameter Y_1 = 10,
     parameter X_1 = 10)
 	(clk, reset, pixel_in, pixel_out, in_valid, out_ready, out_valid);
 
