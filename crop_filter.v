@@ -16,8 +16,16 @@ module crop_filter #(
     input wire out_ready;
     output reg out_valid;
 
-    integer img_idx, next_img_idx;
-    integer x, y;
+
+    localparam IMG_IDX_MAX_VALUE = IN_ROWS * IN_COLS - 1;
+    localparam IMG_IDX_BITWIDTH = $clog2(IMG_IDX_MAX_VALUE + 1); // +1 because $clog2(0) is undefined
+    reg [IMG_IDX_BITWIDTH - 1: 0] img_idx, next_img_idx;
+
+    localparam IMG_COL_BITHWIDTH = $clog2(IN_COLS+1);
+    reg [IMG_COL_BITHWIDTH - 1: 0] x;
+
+    localparam IMG_ROW_BITHWIDTH = $clog2(IN_ROWS+1);
+    reg [IMG_ROW_BITHWIDTH - 1: 0] y;
 
     always @(posedge clk) begin
 
