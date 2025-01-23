@@ -11,45 +11,44 @@ module crop_filter #(
     input wire [11:0] pixel_in;
     output reg [11:0] pixel_out;
     input wire in_valid;
-    // output logic in_ready;
+    // output logic in_ready; // No real need for this, the camera grabber spits out pixels and it's our job to catch them
     input wire out_ready;
     output reg out_valid;
 
-    integer img_idx;
+    integer img_idx, next_img_idx;
+    integer x, y;
 
     always @(posedge clk) begin
 
-        if (reset) begin
-            img_idx <= 0;
-            // in_ready <= 1'b1;
+        if (reset) begin // Reset to next_img_idx = 0, out_valid = 0;
+            next_img_idx <= 0;
             out_valid <= 1'b0;
         end 
         
         else if (in_valid && out_ready) begin
 
-            if (img_idx < IN_ROWS * IN_COLS) begin
+            // increment the index for each in_valid&out_ready clock-cycle
+            img_idx <= next_img_idx;
+            next_img_idx <= next_img_idx + 1; 
 
-                if (img_idx % IN_COLS >= X_1 && img_idx / IN_COLS >= Y_1) begin
-                    pixel_out <= pixel_in;
-                    out_valid <= 1'b1;
-                end 
+            // determine x and y of img_idx
+            y <= img_idx / IN_COLS;
+            x <= img_idx % IN_COLS;
 
-                else begin
-                    out_valid <= 1'b0;
-                end
+            // if it passes the crop-filter, send the pixel out
+            if((y >= Y_1) && (y < Y_1+OUT_ROWS) && (x >= X_1) && (x < X_1+OUT_COLS)) begin 
+                pixel_out <= pixel_in;
+                out_valid <= 1'b1;
+            end
 
-                img_idx <= img_idx + 1;
-
-            end 
-            
+            // else, don't send the pixel
             else begin
                 out_valid <= 1'b0;
             end
 
-        end else begin
-            out_valid <= 1'b0;
-        end
-
+                
+        end 
+        
     end
 
 endmodule
