@@ -16,33 +16,32 @@ module crop_filter #(
     input wire out_ready;
     output reg out_valid;
 
-
-    localparam IMG_IDX_MAX_VALUE = IN_ROWS * IN_COLS - 1;
-    localparam IMG_IDX_BITWIDTH = $clog2(IMG_IDX_MAX_VALUE + 1); // +1 because $clog2(0) is undefined
-    reg [IMG_IDX_BITWIDTH - 1: 0] img_idx, next_img_idx;
-
     localparam IMG_COL_BITHWIDTH = $clog2(IN_COLS+1);
-    reg [IMG_COL_BITHWIDTH - 1: 0] x;
+    reg [IMG_COL_BITHWIDTH - 1: 0] x, next_x;
 
     localparam IMG_ROW_BITHWIDTH = $clog2(IN_ROWS+1);
-    reg [IMG_ROW_BITHWIDTH - 1: 0] y;
+    reg [IMG_ROW_BITHWIDTH - 1: 0] y, next_y;
 
     always @(posedge clk) begin
 
-        if (reset) begin // Reset to next_img_idx = 0, out_valid = 0;
-            next_img_idx <= 0;
+        if (reset) begin // Reset to (next_x, next_y) = (0, 0) and out_valid=0
+            next_x <= 0;
+            next_y <= 0;
             out_valid <= 1'b0;
         end 
         
         else if (in_valid && out_ready) begin
 
-            // increment the index for each in_valid&out_ready clock-cycle
-            img_idx <= next_img_idx;
-            next_img_idx <= next_img_idx + 1; 
-
-            // determine x and y of img_idx
-            y <= img_idx / IN_COLS;
-            x <= img_idx % IN_COLS;
+            // determine x and y of incoming pixel
+            x <= next_x;
+            y <= next_y;
+            if (x == IN_COLS-1) begin
+                next_x <= 0;
+                next_y <= y + 1;
+            end else begin
+                next_x <= x + 1;
+                next_y <= y;
+            end
 
             // if it passes the crop-filter, send the pixel out
             if((y >= Y_1) && (y < Y_1+OUT_ROWS) && (x >= X_1) && (x < X_1+OUT_COLS)) begin 
