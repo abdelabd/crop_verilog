@@ -1,4 +1,4 @@
-// Simple synchronous FIFO
+// Synchronous FIFO with ready-valid handshake
 module fifo_sync #(
     parameter DATA_WIDTH = 12,
     parameter FIFO_DEPTH = 20*20)
