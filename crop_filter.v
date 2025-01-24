@@ -17,35 +17,32 @@ module crop_filter #(
     output reg out_valid;
 
     localparam IMG_COL_BITHWIDTH = $clog2(IN_COLS+1);
-    reg [IMG_COL_BITHWIDTH - 1: 0] x, next_x;
+    reg [IMG_COL_BITHWIDTH - 1: 0] x;
 
     localparam IMG_ROW_BITHWIDTH = $clog2(IN_ROWS+1);
-    reg [IMG_ROW_BITHWIDTH - 1: 0] y, next_y;
+    reg [IMG_ROW_BITHWIDTH - 1: 0] y;
 
-    // Sequential logic
+    // Sequential logic: determine the next x and y values
     always @(posedge clk) begin
 
         if (reset) begin // Reset all the counters to 0 
-            next_x <= 0;
-            next_y <= 0;
             x <= 0;
             y <= 0;
         end 
         
         else if (in_valid && out_ready) begin // if in_vald&&out_ready then increment the counters
 
-            x <= next_x;
-            y <= next_y;
             if (x == IN_COLS-1) begin
-                next_x <= 0;
+                
+                x <= 0;
                 if (y == IN_ROWS-1) begin
-                    next_y <= 0;
+                    y <= 0;
                 end else begin
-                    next_y <= y + 1;
+                    y <= y + 1;
                 end
+
             end else begin
-                next_x <= x + 1;
-                next_y <= y;
+                x <= x + 1;
             end
 
         end
