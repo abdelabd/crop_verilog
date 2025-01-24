@@ -63,7 +63,7 @@ module crop_filter #(
         idx_incr = in_valid; // Increment the counters i.f.f. we receive new data // TODO: consider idx_incr = in_valid & in_ready
     end
 
-    // Sequential logic: DFF pixel_out and out_valid (allow synthesis  more freedom to meet timing constraints)
+    //////////////////////// Sequential logic: DFF pixel_out and out_valid (allow synthesis  more freedom to meet timing constraints) ////////////////////////
     always @(posedge clk) begin
         pixel_out <= pre_DFF_pixel_out;
         out_valid <= pre_DFF_out_valid;
