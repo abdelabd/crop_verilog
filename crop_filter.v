@@ -35,15 +35,12 @@ module crop_filter #(
             if (x == IN_COLS-1) begin
                 
                 x <= 0;
-                if (y == IN_ROWS-1) begin
-                    y <= 0;
-                end else begin
-                    y <= y + 1;
-                end
+                if (y == IN_ROWS-1) y <= 0;
+                else y <= y + 1;
 
-            end else begin
-                x <= x + 1;
-            end
+            end 
+            
+            else  x <= x + 1;
 
         end
 
