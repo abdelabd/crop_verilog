@@ -18,10 +18,10 @@ module crop_filter #(
     output reg out_valid;
 
     //////////////////////// Internal signals ////////////////////////
-    localparam IMG_COL_BITHWIDTH = $clog2(IN_COLS+1);
+    localparam IMG_COL_BITHWIDTH = $clog2(IN_COLS)+1;
     reg [IMG_COL_BITHWIDTH - 1: 0] x; // x-coordinate of the pixel
 
-    localparam IMG_ROW_BITHWIDTH = $clog2(IN_ROWS+1);
+    localparam IMG_ROW_BITHWIDTH = $clog2(IN_ROWS)+1;
     reg [IMG_ROW_BITHWIDTH - 1: 0] y; // y-coordinate of the pixel
 
     reg pass_filter; // 1 if the pixel passes the filter, 0 otherwise
