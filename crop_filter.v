@@ -35,6 +35,7 @@ module crop_filter #(
         if (reset) begin // Reset all the counters to 0 
             x <= 0;
             y <= 0;
+            pass_filter <= 1'b0;
         end 
         else if (idx_incr) begin
             if (x == IN_COLS-1) begin
@@ -52,21 +53,24 @@ module crop_filter #(
 
     //////////////////////// Combinational logic: pre_DFF_pixel_out, in_ready, pre_DFF_out_valid, pass_filter, idx_incr ////////////////////////
     always @(*) begin   
-        pre_DFF_pixel_out = pixel_in; // Keep it simple
+        // pre_DFF_pixel_out = pixel_in; // Keep it simple
+        pixel_out = pixel_in;
         in_ready = out_ready; // Only accept new data if we can pass on existing data
-        pre_DFF_out_valid = in_valid & pass_filter; // Only pass on data if it's new and it passes the filter
 
         // pass_filter logic
         if((y >= Y_1) && (y < Y_1+OUT_ROWS) && (x >= X_1) && (x < X_1+OUT_COLS)) pass_filter = 1'b1; // 1 inside crop-region
         else pass_filter = 1'b0; // 0 otherwise
 
+        // pre_DFF_out_valid = in_valid & pass_filter; // Only pass on data if it's new and it passes the filter
+        out_valid = in_valid & pass_filter;
+
         idx_incr = in_valid; // Increment the counters i.f.f. we receive new data // TODO: consider idx_incr = in_valid & in_ready
     end
 
     //////////////////////// Sequential logic: DFF pixel_out and out_valid (allow synthesis  more freedom to meet timing constraints) ////////////////////////
-    always @(posedge clk) begin
-        pixel_out <= pre_DFF_pixel_out;
-        out_valid <= pre_DFF_out_valid;
-    end
+    // always @(posedge clk) begin
+    //     pixel_out <= pre_DFF_pixel_out;
+    //     out_valid <= pre_DFF_out_valid;
+    // end
 
 endmodule
