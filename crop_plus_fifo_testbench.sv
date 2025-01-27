@@ -52,16 +52,31 @@ module crop_plus_fifo_testbench();
 		forever #(CLOCK_PERIOD/2) clk <= ~clk; // Forever toggle the clock 
 	end  
 
-    //////////////////////// Testbench I/O memory ////////////////////////
+    //////////////////////// Randomize handshake signals ////////////////////////
+
+    // input-valid
+	always_ff @(posedge clk) begin
+		in_valid <= $urandom%2;
+	end
+
+	// output-ready
+	always_ff @(posedge clk) begin
+		out_ready <= $urandom%2;
+	end
+
+    //////////////////////// File-handling ////////////////////////
+
+    // Testbench I/O memory
     logic [FP_TOTAL-1:0] input_mem  [0:IN_ROWS*IN_COLS-1];
     logic [FP_TOTAL-1:0] output_mem [0:OUT_ROWS*OUT_COLS-1];
 
     // Indices to track read/write progress
+    integer i;
     integer idx_in, idx_out;
     integer num_bytes_read;
     integer num_bytes_written;
 
-    //////////////////////// File-handling ////////////////////////
+    // File pointers
     integer input_file, input_read_file, output_file;
 
     // Sequentially read in input data
@@ -72,7 +87,7 @@ module crop_plus_fifo_testbench();
 		else if (in_ready & in_valid) begin
 			idx_in <= idx_in + 1;
 			pixel_in <= input_mem[idx_in]; // give data to module
-            $fwrite(input_read_file, "%b\n", pixel_in);
+            // $fwrite(input_read_file, "%b\n", pixel_in);
 		
 		end	
 	end
@@ -82,31 +97,18 @@ module crop_plus_fifo_testbench();
 		if (reset) begin
 			idx_out <= 0;
 		end	
-		else if (in_ready & in_valid) begin
+		else if (out_ready & out_valid) begin
 			idx_out <= idx_out + 1;
-			$fwrite(output_file, "%b\n", pixel_out);
+            output_mem[idx_out] <= pixel_out; // get data from module
+			// $fwrite(output_file, "%b\n", pixel_out);
 		end	
-	end
-
-    // randomize the input-valid signal
-	always_ff @(posedge clk) begin
-		in_valid <= $urandom%2;
-	end
-
-	// randomize the output-ready signal
-	always_ff @(posedge clk) begin
-		out_ready <= $urandom%2;
 	end
 
     initial begin
 
-        // TODO: randomize out_ready
-        // assign out_ready = 1'b1;
-
-
         //////////////////////// 1. Toggle reset ////////////////////////
         reset = 1'b1;   
-        #100;
+        #(CLOCK_PERIOD*2);
 
         reset = 1'b0;
         #10;
@@ -165,7 +167,7 @@ module crop_plus_fifo_testbench();
             IN_ROWS, IN_COLS,
             OUT_ROWS, OUT_COLS,
             NUM_CROPS), "wb");
-        if (input_read_file == 0) begin
+        if (output_file == 0) begin
             $display("Error: Could not open output file for writing.");
             $stop;
         end
@@ -179,9 +181,15 @@ module crop_plus_fifo_testbench();
        #1000000;
 
         //////////////////////// 5. Save output, close files ////////////////////////
-        $fwrite(input_read_file, input_mem);
-        $fwrite(output_file, output_mem);
-        $display("[INFO] Wrote %0d bytes to output_file.", num_bytes_written);
+        for (i=0; i<OUT_ROWS*OUT_COLS; i=i+1) begin
+            $fwrite(output_file, "%b\n", output_mem[i]);
+        end
+        for (i=0; i<IN_ROWS*IN_COLS; i=i+1) begin
+            $fwrite(input_read_file, "%b\n", input_mem[i]);
+        end
+        // $fwrite(input_read_file, input_mem);
+        // $fwrite(output_file, output_mem);
+        // $display("[INFO] Wrote %0d bytes to output_file.", num_bytes_written);
 
         $fclose(input_file);
         $fclose(input_read_file);
