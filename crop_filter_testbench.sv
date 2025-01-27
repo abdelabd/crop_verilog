@@ -98,7 +98,7 @@ module crop_filter_testbench();
 		else if (out_ready & out_valid) begin
 			idx_out <= idx_out + 1;
             output_mem[idx_out] <= pixel_out; // get data from module
-            assert(pixel_out == pixel_in);
+            assert(pixel_out == pixel_in); // check if output is same as input, which it should be
 		end	
 	end
 
@@ -142,7 +142,7 @@ module crop_filter_testbench();
         $display("[INFO] Read %0d bytes from input_file.", num_bytes_read); 
 
         //////////////////////// 3. Wait for computation to complete ////////////////////////
-       #1000000;
+       #500000;
 
         //////////////////////// 3. Save output, close files ////////////////////////
         // Input-read
