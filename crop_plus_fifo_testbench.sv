@@ -64,9 +64,20 @@ module crop_plus_fifo_testbench();
 
     //////////////////////// Randomize handshake signals ////////////////////////
 
+    // 1. valid-ready = 00
+    // 2. valid-ready = 10
+    // 3. valid-ready = 01
+    // 4. valid-ready = 11 (both random)
+
     // input-valid
 	always_ff @(posedge clk) begin
-        if (cc_counter < IN_ROWS*IN_COLS/2) begin
+        if (cc_counter < 2*IN_ROWS*IN_COLS) begin
+            in_valid <= 1'b0;
+        end
+        else if (cc_counter < 4*IN_ROWS*IN_COLS) begin
+            in_valid <= 1'b1;
+        end
+        else if (cc_counter < 6*IN_ROWS*IN_COLS) begin
             in_valid <= 1'b0;
         end
         else begin
@@ -76,7 +87,18 @@ module crop_plus_fifo_testbench();
 
 	// output-ready
 	always_ff @(posedge clk) begin
-		out_ready <= $urandom%2;
+         if (cc_counter < 2*IN_ROWS*IN_COLS) begin
+            out_ready <= 1'b0;
+        end
+        else if (cc_counter < 4*IN_ROWS*IN_COLS) begin
+            out_ready <= 1'b0;
+        end
+        else if (cc_counter < 6*IN_ROWS*IN_COLS) begin
+            out_ready <= 1'b1;
+        end
+        else begin
+            out_ready <= $urandom%2;
+        end
 	end
 
     //////////////////////// File-handling ////////////////////////
