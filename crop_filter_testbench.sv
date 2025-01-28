@@ -96,7 +96,7 @@ module crop_filter_testbench();
             end
 
             // Asserts
-            assert((idx_in != last_idx_in)|(idx_in==0)); // exception for first cycle 
+            assert((idx_in != last_idx_in)|(idx_in==0)); // exception for first cycle because of indexing
 		end	
 	end
 
@@ -111,10 +111,10 @@ module crop_filter_testbench();
             output_mem[idx_out] <= pixel_out; // get data from module
 
             // Asserts
-            assert(pixel_out == pixel_in); // check if output is same as input, which it should be
-            assert(pixel_out != output_mem[idx_out-1]); // check if output is changing
-            assert((idx_out != last_idx_out)|(idx_out==0)); // exception for first cycle 
-            // assert(output_mem[idx_out] == output_benchmark_mem[idx_out]); // check if output is same as benchmark
+            assert(pixel_out == pixel_in); // confirm output is same as input
+            assert((pixel_out != output_mem[idx_out-1])|(idx_out==0)); // output should be changing for systematic value-equals-index data
+            assert((idx_out != last_idx_out)|(idx_out==0)); // exception for first cycle because of indexing
+            assert((output_mem[last_idx_out] == output_benchmark_mem[last_idx_out])|(last_idx_out==0)); // check if output is same as benchmark, exception on first cycle because of indexing
 		end	
 	end
 
@@ -150,7 +150,7 @@ module crop_filter_testbench();
 
         //////////////////////// 3. Save output, close files ////////////////////////
         // Input-read
-        input_read_file = $fopen($sformatf("tb_data/ap_fixed_%0d_%0d/tb_input_READ_INDEX_noFIFO_%0dx%0d_to_%0dx%0dx%0d.bin",
+        input_read_file = $fopen($sformatf("tb_data/ap_fixed_%0d_%0d/tb_input_READ_INDEX_%0dx%0d_to_%0dx%0dx%0d.bin",
             FP_TOTAL,
             FP_INT,
             IN_ROWS, IN_COLS,
@@ -165,7 +165,7 @@ module crop_filter_testbench();
         end
 
         // Output
-        output_file = $fopen($sformatf("tb_data/ap_fixed_%0d_%0d/tb_output_INDEX_noFIFO_%0dx%0d_to_%0dx%0dx%0d.bin",
+        output_file = $fopen($sformatf("tb_data/ap_fixed_%0d_%0d/tb_output_INDEX_%0dx%0d_to_%0dx%0dx%0d.bin",
             FP_TOTAL,
             FP_INT,
             IN_ROWS, IN_COLS,
