@@ -54,14 +54,12 @@ module fifo_sync #(
                 count <= count + 1; // Increment if we only write new data
             end else if (!(in_valid && in_ready) && (out_valid && out_ready)) begin
                 count <= count - 1; // Decrement if we only read new data
-            end else if ((in_valid && in_ready) && (out_valid && out_ready)) begin
-                count <= count; // Constant if we both read and write
-            end
+            end 
             // else constant
         end
     end
 
-    //////////////////////// Combination logic: handshake signals ////////////////////////
+    //////////////////////// Combinational logic: handshake signals ////////////////////////
     always @(*) begin
         in_ready  = (count < FIFO_DEPTH); // in_ready=1 if not full
         out_valid = (count > 0); // out_valid=1 if not empty
