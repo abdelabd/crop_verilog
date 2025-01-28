@@ -3,13 +3,13 @@
 module crop_filter_testbench();
 
     //////////////////////// User parameters ////////////////////////
-    localparam FP_TOTAL = 12;
-    localparam IN_ROWS         = 40;
-    localparam IN_COLS         = 40;
-    localparam OUT_ROWS        = 20;
-    localparam OUT_COLS        = 20;
-    localparam Y_1             = 10;
-    localparam X_1             = 10;
+    localparam FP_TOTAL = 8;
+    localparam IN_ROWS         = 9;
+    localparam IN_COLS         = 9;
+    localparam OUT_ROWS        = 3;
+    localparam OUT_COLS        = 3;
+    localparam Y_1             = 2;
+    localparam X_1             = 2;
     localparam FP_FRAC = 0; // adjust if needed
     localparam FP_INT = FP_TOTAL - FP_FRAC - 1;
     localparam NUM_CROPS = 1; // how many “crops”/frames you want to process
@@ -69,26 +69,31 @@ module crop_filter_testbench();
     // Testbench I/O memory
     logic [FP_TOTAL-1:0] input_mem  [IN_ROWS*IN_COLS-1:0];
     logic [FP_TOTAL-1:0] output_mem [OUT_ROWS*OUT_COLS-1:0];
+    logic [FP_TOTAL-1:0] output_benchmark_mem [OUT_ROWS*OUT_COLS-1:0];
+    logic finished;
 
     // Indices to track read/write progress
     integer i;
     integer last_idx_in, idx_in, last_idx_out, idx_out;
-    integer num_bytes_read;
-    integer num_bytes_written;
 
     // File pointers
-    integer input_file, input_read_file, output_file;
+    integer input_file, input_read_file, output_file, output_benchmark_file;
 
     // Sequentially read in input data
 	always_ff @(posedge clk) begin
 		if (reset) begin
             last_idx_in <= 0;
 			idx_in <= 0;
+            finished <= 1'b0;
 		end	
 		else if (in_ready & in_valid) begin
             last_idx_in <= idx_in;
 			idx_in <= idx_in + 1;
 			pixel_in <= input_mem[idx_in]; // give data to module
+
+            if (idx_in == IN_ROWS*IN_COLS-1) begin
+                finished <= 1'b1;
+            end
 
             // Asserts
             assert((idx_in != last_idx_in)|(idx_in==0)); // exception for first cycle 
@@ -107,7 +112,9 @@ module crop_filter_testbench();
 
             // Asserts
             assert(pixel_out == pixel_in); // check if output is same as input, which it should be
+            assert(pixel_out != output_mem[idx_out-1]); // check if output is changing
             assert((idx_out != last_idx_out)|(idx_out==0)); // exception for first cycle 
+            // assert(output_mem[idx_out] == output_benchmark_mem[idx_out]); // check if output is same as benchmark
 		end	
 	end
 
@@ -120,38 +127,26 @@ module crop_filter_testbench();
         reset = 1'b0;
         #10;
 
-        //////////////////////// 2. Load input data ////////////////////////
-        input_file = $fopen($sformatf("tb_data/ap_fixed_%0d_%0d/tb_input_INDEX_%0dx%0d_to_%0dx%0dx%0d.bin",
+        //////////////////////// 2. Load input and benchmark data ////////////////////////
+
+        // input data
+        $readmemb($sformatf("tb_data/ap_fixed_%0d_%0d/tb_input_INDEX_%0dx%0d_to_%0dx%0dx%0d.bin",
             FP_TOTAL,
             FP_INT,
             IN_ROWS, IN_COLS,
             OUT_ROWS, OUT_COLS,
-            NUM_CROPS), "rb");
-        if (input_file == 0) begin
-            $display("Error: Could not open input file for reading.");
-            $stop;
-        end
-        else begin
-            $display("Could indeed open input file for reading.");
-        end
+            NUM_CROPS), input_mem);
 
-        // Use $fread in SystemVerilog to read binary data:
-        // Each pixel is FP_TOTAL bits. If FP_TOTAL
-        // is not a multiple of 8, you may need a custom approach.
-        // 
-        // We'll assume that each pixel_in is stored in the file as a
-        // zero-padded multiple of 8 bits. For example, if FP_TOTAL=12,
-        // you might actually store 16 bits per pixel in the file, with the upper 4 bits 0.
-        //
-        // Another approach is to read bytes in a loop, then assemble them. 
-        // The example below tries $fread directly, but might need adjustments 
-        // if your file is strictly 12 bits per pixel in raw binary.
-
-        num_bytes_read = $fread(input_mem, input_file);
-        $display("[INFO] Read %0d bytes from input_file.", num_bytes_read); 
+        $readmemb($sformatf("tb_data/ap_fixed_%0d_%0d/tb_benchmark_output_INDEX_%0dx%0d_to_%0dx%0dx%0d.bin",
+            FP_TOTAL,
+            FP_INT,
+            IN_ROWS, IN_COLS,
+            OUT_ROWS, OUT_COLS,
+            NUM_CROPS), output_benchmark_mem);
 
         //////////////////////// 3. Wait for computation to complete ////////////////////////
-       #500000;
+    //    #(10*IN_ROWS*IN_COLS*CLOCK_PERIOD+1000);
+        wait(finished);
 
         //////////////////////// 3. Save output, close files ////////////////////////
         // Input-read
