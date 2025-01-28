@@ -67,40 +67,53 @@ module crop_plus_fifo_testbench();
     //////////////////////// File-handling ////////////////////////
 
     // Testbench I/O memory
-    logic [FP_TOTAL-1:0] input_mem  [0:IN_ROWS*IN_COLS-1];
-    logic [FP_TOTAL-1:0] output_mem [0:OUT_ROWS*OUT_COLS-1];
+    logic [FP_TOTAL-1:0] input_mem  [IN_ROWS*IN_COLS-1:0];
+    logic [FP_TOTAL-1:0] output_mem [OUT_ROWS*OUT_COLS-1:0];
+    logic [FP_TOTAL-1:0] output_benchmark_mem [OUT_ROWS*OUT_COLS-1:0];
+    logic finished;
 
     // Indices to track read/write progress
     integer i;
-    integer idx_in, idx_out;
-    integer num_bytes_read;
-    integer num_bytes_written;
+    integer last_idx_in, idx_in, last_idx_out, idx_out;
 
     // File pointers
-    integer input_file, input_read_file, output_file;
+    integer input_file, input_read_file, output_file, output_benchmark_file;
 
     // Sequentially read in input data
 	always_ff @(posedge clk) begin
 		if (reset) begin
+            last_idx_in <= 0;
 			idx_in <= 0;
+            finished <= 1'b0;
 		end	
 		else if (in_ready & in_valid) begin
+            last_idx_in <= idx_in;
 			idx_in <= idx_in + 1;
 			pixel_in <= input_mem[idx_in]; // give data to module
-            // $fwrite(input_read_file, "%b\n", pixel_in);
-		
+
+            if (idx_in == IN_ROWS*IN_COLS-1) begin
+                finished <= 1'b1;
+            end
+
+            // Asserts
+            assert((idx_in != last_idx_in)|(idx_in==0)); // exception for first cycle because of indexing
 		end	
 	end
 
     // Sequentially read out output data
 	always_ff @(posedge clk) begin
 		if (reset) begin
+            last_idx_out <= 0;
 			idx_out <= 0;
 		end	
 		else if (out_ready & out_valid) begin
 			idx_out <= idx_out + 1;
             output_mem[idx_out] <= pixel_out; // get data from module
-			// $fwrite(output_file, "%b\n", pixel_out);
+
+            // Asserts
+            assert((pixel_out != output_mem[idx_out-1])|(idx_out==0)); // output should be changing for systematic value-equals-index data
+            assert((idx_out != last_idx_out)|(idx_out==0)); // exception for first cycle because of indexing
+            assert((output_mem[last_idx_out] == output_benchmark_mem[last_idx_out])|(last_idx_out==0)); // check if output is same as benchmark, exception on first cycle because of indexing
 		end	
 	end
 
@@ -113,38 +126,34 @@ module crop_plus_fifo_testbench();
         reset = 1'b0;
         #10;
 
-        //////////////////////// 2. Load input data ////////////////////////
-        input_file = $fopen($sformatf("tb_data/ap_fixed_%0d_%0d/tb_input_INDEX_%0dx%0d_to_%0dx%0dx%0d.bin",
+        //////////////////////// 2. Load input and benchmark data ////////////////////////
+
+        // input data
+        $readmemb($sformatf("tb_data/ap_fixed_%0d_%0d/tb_input_INDEX_%0dx%0d_to_%0dx%0dx%0d.bin",
             FP_TOTAL,
             FP_INT,
             IN_ROWS, IN_COLS,
             OUT_ROWS, OUT_COLS,
-            NUM_CROPS), "rb");
-        if (input_file == 0) begin
-            $display("Error: Could not open input file for reading.");
-            $stop;
-        end
-        else begin
-            $display("Could indeed open input file for reading.");
-        end
+            NUM_CROPS), input_mem);
 
-        // Use $fread in SystemVerilog to read binary data:
-        // Each pixel is FP_TOTAL bits. If FP_TOTAL
-        // is not a multiple of 8, you may need a custom approach.
-        // 
-        // We'll assume that each pixel_in is stored in the file as a
-        // zero-padded multiple of 8 bits. For example, if FP_TOTAL=12,
-        // you might actually store 16 bits per pixel in the file, with the upper 4 bits 0.
-        //
-        // Another approach is to read bytes in a loop, then assemble them. 
-        // The example below tries $fread directly, but might need adjustments 
-        // if your file is strictly 12 bits per pixel in raw binary.
+        $readmemb($sformatf("tb_data/ap_fixed_%0d_%0d/tb_benchmark_output_INDEX_%0dx%0d_to_%0dx%0dx%0d.bin",
+            FP_TOTAL,
+            FP_INT,
+            IN_ROWS, IN_COLS,
+            OUT_ROWS, OUT_COLS,
+            NUM_CROPS), output_benchmark_mem);
 
-        num_bytes_read = $fread(input_mem, input_file);
-        $display("[INFO] Read %0d bytes from input_file.", num_bytes_read); 
+        //////////////////////// 3. Wait for computation to complete ////////////////////////
+    //    #(10*IN_ROWS*IN_COLS*CLOCK_PERIOD+1000);
+        wait(finished);
 
-        //////////////////////// 3. Open files to which we want to write ////////////////////////
-
+        $display("input_file location = %0d", $sformatf("tb_data/ap_fixed_%0d_%0d/tb_input_INDEX_%0dx%0d_to_%0dx%0dx%0d.bin",
+            FP_TOTAL,
+            FP_INT,
+            IN_ROWS, IN_COLS,
+            OUT_ROWS, OUT_COLS,
+            NUM_CROPS));
+        //////////////////////// 3. Save output, close files ////////////////////////
         // Input-read
         input_read_file = $fopen($sformatf("tb_data/ap_fixed_%0d_%0d/tb_input_READ_INDEX_%0dx%0d_to_%0dx%0dx%0d.bin",
             FP_TOTAL,
@@ -175,21 +184,13 @@ module crop_plus_fifo_testbench();
             $display("Could indeed open output file for writing.");
         end
 
-        //////////////////////// 4. Turn off reset ////////////////////////
 
-        //////////////////////// 5. Wait for computation to complete ////////////////////////
-       #1000000;
-
-        //////////////////////// 5. Save output, close files ////////////////////////
         for (i=0; i<OUT_ROWS*OUT_COLS; i=i+1) begin
             $fwrite(output_file, "%b\n", output_mem[i]);
         end
         for (i=0; i<IN_ROWS*IN_COLS; i=i+1) begin
             $fwrite(input_read_file, "%b\n", input_mem[i]);
         end
-        // $fwrite(input_read_file, input_mem);
-        // $fwrite(output_file, output_mem);
-        // $display("[INFO] Wrote %0d bytes to output_file.", num_bytes_written);
 
         $fclose(input_file);
         $fclose(input_read_file);
