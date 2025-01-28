@@ -6,7 +6,6 @@ vlib work
 #     their own "vlog" line below.
 vlog "./crop_filter_testbench.sv"
 vlog "./crop_filter.v"
-vlog "./fifo_sync.v"
 
 # Call vsim to invoke simulator
 #     Make sure the last item on the line is the name of the
