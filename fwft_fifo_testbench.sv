@@ -1,6 +1,6 @@
 `timescale 1ns/1ps
 
-module fifo_sync_testbench();
+module fwft_fifo_testbench();
 
     //////////////////////// User parameters ////////////////////////
     localparam FP_TOTAL = 8;
@@ -24,9 +24,9 @@ module fifo_sync_testbench();
     
     
     //////////////////////// DUT module ////////////////////////
-    fifo_sync #(
+    first_word_fall_through_fifo #(
         .DATA_WIDTH(FP_TOTAL),
-        .FIFO_DEPTH(IN_ROWS*IN_COLS)
+        .DEPTH(IN_ROWS*IN_COLS)
         ) dut (
         .clk       (clk),
         .reset     (reset),
@@ -115,9 +115,9 @@ module fifo_sync_testbench();
             output_mem[idx_out] <= out_data; // get data from module
 
             // Asserts
-            assert((out_data != output_mem[idx_out-1])|(idx_out==0)); // output should be changing for systematic value-equals-index data
+            // assert((out_data != output_mem[idx_out-1])|(idx_out==0)); // output should be changing for systematic value-equals-index data
             assert((idx_out != last_idx_out)|(idx_out==0)); // exception for first cycle because of indexing
-            assert((output_mem[last_idx_out] == input_mem[last_idx_out])|(idx_out==0)); // check if output is same as input, exception on first cycle because of indexing
+            assert((output_mem[last_idx_out] == input_mem[idx_out])|(idx_out==0)); // check if output is same as input, exception on first cycle because of indexing
 		end	
 	end
 

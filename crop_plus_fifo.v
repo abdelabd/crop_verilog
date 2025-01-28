@@ -39,10 +39,10 @@ module crop_plus_fifo #(
             .in_valid(in_valid),
             .out_ready(intermediate_in_ready),
             .out_valid(intermediate_out_valid));
-            
-    fifo_sync #(
+
+    first_word_fall_through_fifo #(
         .DATA_WIDTH(PIXEL_BIT_WIDTH),
-        .FIFO_DEPTH(OUT_ROWS*OUT_COLS))
+        .DEPTH(OUT_ROWS*OUT_COLS))
         fifo_sync_inst(
             .clk(clk),
             .reset(reset),
