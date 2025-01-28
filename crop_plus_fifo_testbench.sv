@@ -191,6 +191,13 @@ module crop_plus_fifo_testbench();
             IN_ROWS, IN_COLS,
             OUT_ROWS, OUT_COLS,
             NUM_CROPS));
+        
+         $display("output_file location = %0d", $sformatf("tb_data/ap_fixed_%0d_%0d/tb_output_INDEX_%0dx%0d_to_%0dx%0dx%0d.bin",
+            FP_TOTAL,
+            FP_INT,
+            IN_ROWS, IN_COLS,
+            OUT_ROWS, OUT_COLS,
+            NUM_CROPS));
         //////////////////////// 3. Save output, close files ////////////////////////
         // Input-read
         input_read_file = $fopen($sformatf("tb_data/ap_fixed_%0d_%0d/tb_input_READ_INDEX_%0dx%0d_to_%0dx%0dx%0d.bin",
