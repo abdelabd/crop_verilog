@@ -3,13 +3,13 @@
 module crop_filter_testbench();
 
     //////////////////////// User parameters ////////////////////////
-    localparam FP_TOTAL = 8;
-    localparam IN_ROWS         = 9;
-    localparam IN_COLS         = 9;
-    localparam OUT_ROWS        = 3;
-    localparam OUT_COLS        = 3;
-    localparam Y_1             = 2;
-    localparam X_1             = 2;
+    localparam FP_TOTAL = 12;
+    localparam IN_ROWS         = 40;
+    localparam IN_COLS         = 40;
+    localparam OUT_ROWS        = 20;
+    localparam OUT_COLS        = 20;
+    localparam Y_1             = 10;
+    localparam X_1             = 10;
     localparam FP_FRAC = 0; // adjust if needed
     localparam FP_INT = FP_TOTAL - FP_FRAC - 1;
     localparam NUM_CROPS = 1; // how many “crops”/frames you want to process
@@ -148,6 +148,12 @@ module crop_filter_testbench();
     //    #(10*IN_ROWS*IN_COLS*CLOCK_PERIOD+1000);
         wait(finished);
 
+        $display("input_file location = %0d", $sformatf("tb_data/ap_fixed_%0d_%0d/tb_input_INDEX_%0dx%0d_to_%0dx%0dx%0d.bin",
+            FP_TOTAL,
+            FP_INT,
+            IN_ROWS, IN_COLS,
+            OUT_ROWS, OUT_COLS,
+            NUM_CROPS));
         //////////////////////// 3. Save output, close files ////////////////////////
         // Input-read
         input_read_file = $fopen($sformatf("tb_data/ap_fixed_%0d_%0d/tb_input_READ_INDEX_%0dx%0d_to_%0dx%0dx%0d.bin",
