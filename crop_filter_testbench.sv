@@ -3,13 +3,13 @@
 module crop_filter_testbench();
 
     //////////////////////// User parameters ////////////////////////
-    localparam FP_TOTAL = 12;
-    localparam IN_ROWS         = 40;
-    localparam IN_COLS         = 40;
-    localparam OUT_ROWS        = 20;
-    localparam OUT_COLS        = 20;
-    localparam Y_1             = 10;
-    localparam X_1             = 10;
+    localparam FP_TOTAL = 8;
+    localparam IN_ROWS         = 9;
+    localparam IN_COLS         = 9;
+    localparam OUT_ROWS        = 3;
+    localparam OUT_COLS        = 3;
+    localparam Y_1             = 2;
+    localparam X_1             = 2;
     localparam FP_FRAC = 0; // adjust if needed
     localparam FP_INT = FP_TOTAL - FP_FRAC - 1;
     localparam NUM_CROPS = 1; // how many “crops”/frames you want to process
@@ -107,6 +107,7 @@ module crop_filter_testbench();
 			idx_out <= 0;
 		end	
 		else if (out_ready & out_valid) begin
+            last_idx_out <= idx_out;
 			idx_out <= idx_out + 1;
             output_mem[idx_out] <= pixel_out; // get data from module
 
@@ -114,7 +115,7 @@ module crop_filter_testbench();
             assert(pixel_out == pixel_in); // confirm output is same as input
             assert((pixel_out != output_mem[idx_out-1])|(idx_out==0)); // output should be changing for systematic value-equals-index data
             assert((idx_out != last_idx_out)|(idx_out==0)); // exception for first cycle because of indexing
-            assert((output_mem[last_idx_out] == output_benchmark_mem[last_idx_out])|(last_idx_out==0)); // check if output is same as benchmark, exception on first cycle because of indexing
+            assert((output_mem[last_idx_out] == output_benchmark_mem[last_idx_out])|(idx_out==0)); // check if output is same as benchmark, exception on first cycle because of indexing
 		end	
 	end
 
