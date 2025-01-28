@@ -52,11 +52,26 @@ module crop_plus_fifo_testbench();
 		forever #(CLOCK_PERIOD/2) clk <= ~clk; // Forever toggle the clock 
 	end  
 
+    integer cc_counter; // cycle counter
+    always_ff @(posedge clk) begin
+        if (reset) begin
+            cc_counter <= 0;
+        end
+        else begin
+            cc_counter <= cc_counter + 1;
+        end
+    end
+
     //////////////////////// Randomize handshake signals ////////////////////////
 
     // input-valid
 	always_ff @(posedge clk) begin
-		in_valid <= $urandom%2;
+        if (cc_counter < IN_ROWS*IN_COLS/2) begin
+            in_valid <= 1'b0;
+        end
+        else begin
+            in_valid <= $urandom%2;
+        end
 	end
 
 	// output-ready
