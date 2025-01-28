@@ -54,7 +54,7 @@ module crop_filter #(
         in_ready = out_ready; // Only accept new data if we can pass on existing data
 
         // pass_filter logic
-        if((y >= Y_1) && (y < Y_1+OUT_ROWS) && (x >= X_1) && (x < X_1+OUT_COLS)) pass_filter = 1'b1; // 1 inside crop-region
+        if((y >= Y_1) && (y < Y_1+OUT_ROWS) && (x > X_1) && (x <= X_1+OUT_COLS)) pass_filter = 1'b1; // 1 inside crop-region
         else pass_filter = 1'b0; // 0 otherwise
 
         // pre_DFF_out_valid = in_valid & pass_filter; // Only pass on data if it's new and it passes the filter
