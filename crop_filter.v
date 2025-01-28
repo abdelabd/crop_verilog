@@ -26,9 +26,6 @@ module crop_filter #(
 
     reg pass_filter; // 1 if the pixel passes the filter, 0 otherwise
     reg idx_incr; // 1 if we should increment the x and y counters, 0 otherwise
-    reg [PIXEL_BIT_WIDTH-1:0] pre_DFF_pixel_out;
-    reg pre_DFF_out_valid;
-
 
     //////////////////////// Sequential logic: determine the x- and y-coordinates of the pixel ////////////////////////
     always @(posedge clk) begin
@@ -53,7 +50,6 @@ module crop_filter #(
 
     //////////////////////// Combinational logic: pre_DFF_pixel_out, in_ready, pre_DFF_out_valid, pass_filter, idx_incr ////////////////////////
     always @(*) begin   
-        // pre_DFF_pixel_out = pixel_in; // Keep it simple
         pixel_out = pixel_in;
         in_ready = out_ready; // Only accept new data if we can pass on existing data
 
@@ -66,11 +62,5 @@ module crop_filter #(
 
         idx_incr = in_valid; // Increment the counters i.f.f. we receive new data // TODO: consider idx_incr = in_valid & in_ready
     end
-
-    //////////////////////// Sequential logic: DFF pixel_out and out_valid (allow synthesis  more freedom to meet timing constraints) ////////////////////////
-    // always @(posedge clk) begin
-    //     pixel_out <= pre_DFF_pixel_out;
-    //     out_valid <= pre_DFF_out_valid;
-    // end
 
 endmodule
