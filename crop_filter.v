@@ -60,7 +60,7 @@ module crop_filter #(
         // pre_DFF_out_valid = in_valid & pass_filter; // Only pass on data if it's new and it passes the filter
         out_valid = in_valid & pass_filter;
 
-        idx_incr = in_valid; // Increment the counters i.f.f. we receive new data // TODO: consider idx_incr = in_valid & in_ready
+        idx_incr = in_valid & in_ready; // Increment the counters i.f.f. we receive new data 
     end
 
 endmodule
