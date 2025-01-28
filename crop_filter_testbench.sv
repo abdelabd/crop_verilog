@@ -72,7 +72,7 @@ module crop_filter_testbench();
 
     // Indices to track read/write progress
     integer i;
-    integer idx_in, idx_out;
+    integer last_idx_in, idx_in, last_idx_out, idx_out;
     integer num_bytes_read;
     integer num_bytes_written;
 
@@ -82,23 +82,32 @@ module crop_filter_testbench();
     // Sequentially read in input data
 	always_ff @(posedge clk) begin
 		if (reset) begin
+            last_idx_in <= 0;
 			idx_in <= 0;
 		end	
 		else if (in_ready & in_valid) begin
+            last_idx_in <= idx_in;
 			idx_in <= idx_in + 1;
 			pixel_in <= input_mem[idx_in]; // give data to module
+
+            // Asserts
+            assert((idx_in != last_idx_in)|(idx_in==0)); // exception for first cycle 
 		end	
 	end
 
     // Sequentially read out output data
 	always_ff @(posedge clk) begin
 		if (reset) begin
+            last_idx_out <= 0;
 			idx_out <= 0;
 		end	
 		else if (out_ready & out_valid) begin
 			idx_out <= idx_out + 1;
             output_mem[idx_out] <= pixel_out; // get data from module
+
+            // Asserts
             assert(pixel_out == pixel_in); // check if output is same as input, which it should be
+            assert((idx_out != last_idx_out)|(idx_out==0)); // exception for first cycle 
 		end	
 	end
 
