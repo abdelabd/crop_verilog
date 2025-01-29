@@ -166,10 +166,7 @@ module crop_plus_fifo_testbench();
     integer run_counter = 0;
     initial begin
 
-        //////////////////////// 1. Toggle reset ////////////////////////
-        reset <= 1'b1; #(CLOCK_PERIOD*2); reset <= 1'b0; #10;
-
-        //////////////////////// 2. Load input and benchmark data ////////////////////////
+        //////////////////////// 1. Load input and benchmark data ////////////////////////
 
         // input data
         $readmemb($sformatf("tb_data/ap_fixed_%0d_%0d/tb_input_INDEX_%0dx%0d_to_%0dx%0dx%0d.bin",
@@ -186,13 +183,13 @@ module crop_plus_fifo_testbench();
             OUT_ROWS, OUT_COLS,
             NUM_CROPS), output_benchmark_mem);
 
-        //////////////////////// 3. Wait for computation to complete ////////////////////////
+        //////////////////////// 2. Wait for computation to complete ////////////////////////
 
         // Let's run it several times
         repeat(1000) begin 
+            reset <= 1'b1; #(CLOCK_PERIOD*2); reset <= 1'b0; 
             wait(finished);
             run_counter <= run_counter + 1;
-            reset <= 1'b1; #(CLOCK_PERIOD*2); reset <= 1'b0; #10;
         end
         $display("\n\n[INFO] Total runs = %0d", run_counter+1);
 
@@ -209,6 +206,7 @@ module crop_plus_fifo_testbench();
             IN_ROWS, IN_COLS,
             OUT_ROWS, OUT_COLS,
             NUM_CROPS));
+
         //////////////////////// 3. Save output, close files ////////////////////////
         // Input-read
         input_read_file = $fopen($sformatf("tb_data/ap_fixed_%0d_%0d/tb_input_READ_INDEX_%0dx%0d_to_%0dx%0dx%0d.bin",
@@ -252,7 +250,7 @@ module crop_plus_fifo_testbench();
         $fclose(input_read_file);
         $fclose(output_file);
         
-        //////////////////////// 5. End sim ////////////////////////
+        //////////////////////// 4. End sim ////////////////////////
         
         $display("\n\n[TB] Simulation complete.");
         $stop;
