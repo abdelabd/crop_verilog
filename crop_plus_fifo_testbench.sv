@@ -109,12 +109,7 @@ module crop_plus_fifo_testbench();
     logic [FP_TOTAL-1:0] output_benchmark_mem [OUT_ROWS*OUT_COLS-1:0];
     logic finished;
 
-    logic [FP_TOTAL-1:0] input_mem_refresh  [IN_ROWS*IN_COLS-1:0];
     genvar ii;
-    for (ii=0; ii<IN_ROWS*IN_COLS; ii++) begin
-        assign input_mem_refresh[ii] = 0;
-    end
-
     logic [FP_TOTAL-1:0] output_mem_refresh  [OUT_ROWS*OUT_COLS-1:0];
     for (ii=0; ii<OUT_ROWS*OUT_COLS; ii++) begin
         assign output_mem_refresh[ii] = 0;
@@ -134,7 +129,6 @@ module crop_plus_fifo_testbench();
             last_idx_in <= 0;
 			idx_in <= 0;
             finished <= 1'b0;
-            input_mem <= input_mem_refresh;
 		end	
 		else if (in_ready & in_valid) begin
             last_idx_in <= idx_in;
@@ -192,12 +186,12 @@ module crop_plus_fifo_testbench();
             NUM_CROPS), output_benchmark_mem);
 
         //////////////////////// 3. Wait for computation to complete ////////////////////////
-        
+
     //    #(10*IN_ROWS*IN_COLS*CLOCK_PERIOD+1000);
         wait(finished);
         $display("\n\nFirst run complete.\n\n");
 
-        reset <= 1'b1; #(CLOCK_PERIOD*2); reset <= 1'b0; #10;
+        reset <= 1'b1; #(CLOCK_PERIOD*1000); reset <= 1'b0; #10;
         wait(finished);
         $display("\n\nSecond run complete.\n\n");
 
