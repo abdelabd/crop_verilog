@@ -163,6 +163,7 @@ module crop_plus_fifo_testbench();
 		end	
 	end
 
+    integer run_counter = 0;
     initial begin
 
         //////////////////////// 1. Toggle reset ////////////////////////
@@ -187,13 +188,13 @@ module crop_plus_fifo_testbench();
 
         //////////////////////// 3. Wait for computation to complete ////////////////////////
 
-    //    #(10*IN_ROWS*IN_COLS*CLOCK_PERIOD+1000);
-        wait(finished);
-        $display("\n\nFirst run complete.\n\n");
-
-        reset <= 1'b1; #(CLOCK_PERIOD*1000); reset <= 1'b0; #10;
-        wait(finished);
-        $display("\n\nSecond run complete.\n\n");
+        // Let's run it several times
+        repeat(1000) begin 
+            wait(finished);
+            run_counter <= run_counter + 1;
+            reset <= 1'b1; #(CLOCK_PERIOD*2); reset <= 1'b0; #10;
+        end
+        $display("\n\n[INFO] Total runs = %0d", run_counter+1);
 
         $display("input_file location = %0d", $sformatf("tb_data/ap_fixed_%0d_%0d/tb_input_INDEX_%0dx%0d_to_%0dx%0dx%0d.bin",
             FP_TOTAL,
