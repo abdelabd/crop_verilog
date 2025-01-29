@@ -109,6 +109,18 @@ module crop_plus_fifo_testbench();
     logic [FP_TOTAL-1:0] output_benchmark_mem [OUT_ROWS*OUT_COLS-1:0];
     logic finished;
 
+    logic [FP_TOTAL-1:0] input_mem_refresh  [IN_ROWS*IN_COLS-1:0];
+    genvar ii;
+    for (ii=0; ii<IN_ROWS*IN_COLS; ii++) begin
+        assign input_mem_refresh[ii] = 0;
+    end
+
+    logic [FP_TOTAL-1:0] output_mem_refresh  [OUT_ROWS*OUT_COLS-1:0];
+    for (ii=0; ii<OUT_ROWS*OUT_COLS; ii++) begin
+        assign output_mem_refresh[ii] = 0;
+    end
+
+
     // Indices to track read/write progress
     integer i;
     integer last_idx_in, idx_in, last_idx_out, idx_out;
@@ -122,6 +134,7 @@ module crop_plus_fifo_testbench();
             last_idx_in <= 0;
 			idx_in <= 0;
             finished <= 1'b0;
+            input_mem <= input_mem_refresh;
 		end	
 		else if (in_ready & in_valid) begin
             last_idx_in <= idx_in;
@@ -142,6 +155,7 @@ module crop_plus_fifo_testbench();
 		if (reset) begin
             last_idx_out <= 0;
 			idx_out <= 0;
+            output_mem <= output_mem_refresh;
 		end	
 		else if (out_ready & out_valid) begin
             last_idx_out <= idx_out;
@@ -158,11 +172,7 @@ module crop_plus_fifo_testbench();
     initial begin
 
         //////////////////////// 1. Toggle reset ////////////////////////
-        reset = 1'b1;   
-        #(CLOCK_PERIOD*2);
-
-        reset = 1'b0;
-        #10;
+        reset <= 1'b1; #(CLOCK_PERIOD*2); reset <= 1'b0; #10;
 
         //////////////////////// 2. Load input and benchmark data ////////////////////////
 
@@ -182,8 +192,14 @@ module crop_plus_fifo_testbench();
             NUM_CROPS), output_benchmark_mem);
 
         //////////////////////// 3. Wait for computation to complete ////////////////////////
+        
     //    #(10*IN_ROWS*IN_COLS*CLOCK_PERIOD+1000);
         wait(finished);
+        $display("\n\nFirst run complete.\n\n");
+
+        reset <= 1'b1; #(CLOCK_PERIOD*2); reset <= 1'b0; #10;
+        wait(finished);
+        $display("\n\nSecond run complete.\n\n");
 
         $display("input_file location = %0d", $sformatf("tb_data/ap_fixed_%0d_%0d/tb_input_INDEX_%0dx%0d_to_%0dx%0dx%0d.bin",
             FP_TOTAL,
@@ -207,11 +223,11 @@ module crop_plus_fifo_testbench();
             OUT_ROWS, OUT_COLS,
             NUM_CROPS), "wb");
         if (input_read_file == 0) begin
-            $display("Error: Could not open input-read file for writing.");
+            $display("\n\nError: Could not open input-read file for writing.");
             $stop;
         end
         else begin
-            $display("Could indeed open input-read file for writing.");
+            $display("\n\nCould indeed open input-read file for writing.");
         end
 
         // Output
@@ -243,7 +259,7 @@ module crop_plus_fifo_testbench();
         
         //////////////////////// 5. End sim ////////////////////////
         
-        $display("[TB] Simulation complete.");
+        $display("\n\n[TB] Simulation complete.");
         $stop;
     end
 
