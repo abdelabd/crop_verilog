@@ -84,6 +84,8 @@ module fwft_fifo_testbench();
 
     // Sequentially read in input data
 	always_ff @(posedge clk) begin
+        in_data <= input_mem[idx_in]; // give data to module
+
 		if (reset) begin
             last_idx_in <= 0;
 			idx_in <= 0;
@@ -92,8 +94,6 @@ module fwft_fifo_testbench();
 		else if (in_ready & in_valid) begin
             last_idx_in <= idx_in;
 			idx_in <= idx_in + 1;
-			in_data <= input_mem[idx_in]; // give data to module
-
             if (idx_in == IN_ROWS*IN_COLS-1) begin
                 finished <= 1'b1;
             end
@@ -117,7 +117,7 @@ module fwft_fifo_testbench();
             // Asserts
             // assert((out_data != output_mem[idx_out-1])|(idx_out==0)); // output should be changing for systematic value-equals-index data
             assert((idx_out != last_idx_out)|(idx_out==0)); // exception for first cycle because of indexing
-            assert((output_mem[last_idx_out] == input_mem[idx_out])|(idx_out==0)); // check if output is same as input, exception on first cycle because of indexing
+            assert((output_mem[last_idx_out] == input_mem[last_idx_out])|(idx_out==0)); // check if output is same as input, exception on first cycle because of indexing
 		end	
 	end
 
@@ -126,10 +126,9 @@ module fwft_fifo_testbench();
         //////////////////////// 1. Toggle reset ////////////////////////
         reset = 1'b1;   
         #(CLOCK_PERIOD*2);
-
         reset = 1'b0;
         #10;
-
+        
         //////////////////////// 2. Load input data ////////////////////////
 
         // input data
@@ -139,6 +138,8 @@ module fwft_fifo_testbench();
             IN_ROWS, IN_COLS,
             OUT_ROWS, OUT_COLS,
             NUM_CROPS), input_mem);
+
+        
 
         //////////////////////// 3. Wait for computation to complete ////////////////////////
        #(5*IN_ROWS*IN_COLS*CLOCK_PERIOD+1000);
