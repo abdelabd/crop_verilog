@@ -96,8 +96,8 @@ module myproject_testbench();
 	end
 
 	integer cc_counter; // cycle counter
-    always_ff @(posedge clk) begin
-        if (reset) begin
+    always_ff @(posedge ap_clk) begin
+        if (~ap_rst_n) begin
             cc_counter <= 0;
         end
         else begin
@@ -112,7 +112,7 @@ module myproject_testbench();
     // 3. valid-ready = 01
     // 4. valid-ready = 11 (both random)
 
-	always_ff @(posedge clk) begin
+	always_ff @(posedge ap_clk) begin
         if (cc_counter < 2*OUT_ROWS*OUT_COLS) begin
             conv2d_input_V_data_0_V_TVALID <= 1'b0;
         end
@@ -129,7 +129,7 @@ module myproject_testbench();
 
 	// output-ready
 
-	always_ff @(posedge clk) begin
+	always_ff @(posedge ap_clk) begin
         if (cc_counter < 2*OUT_ROWS*OUT_COLS) begin
             layer15_out_V_data_0_V_TREADY <= 1'b0;
 			layer15_out_V_data_1_V_TREADY <= 1'b0;
