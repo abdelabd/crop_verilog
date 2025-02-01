@@ -217,6 +217,9 @@ module crop_plus_fifo_testbench();
         else begin
             $display("\n\nCould indeed open input-read file for writing.");
         end
+        for (i=0; i<IN_ROWS*IN_COLS; i=i+1) begin
+            $fwrite(input_read_file, "%b\n", input_mem[i]);
+        end
 
         // Output
         output_file = $fopen($sformatf("tb_data/ap_fixed_%0d_%0d/tb_output_INDEX_%0dx%0d_to_%0dx%0dx%0d.bin",
@@ -232,14 +235,10 @@ module crop_plus_fifo_testbench();
         else begin
             $display("Could indeed open output file for writing.");
         end
-
-
         for (i=0; i<OUT_ROWS*OUT_COLS; i=i+1) begin
             $fwrite(output_file, "%b\n", output_mem[i]);
         end
-        for (i=0; i<IN_ROWS*IN_COLS; i=i+1) begin
-            $fwrite(input_read_file, "%b\n", input_mem[i]);
-        end
+        
 
         $fclose(input_file);
         $fclose(input_read_file);
