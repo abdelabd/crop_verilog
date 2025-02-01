@@ -193,33 +193,41 @@ module myproject_testbench();
 	
 	// Sequentially read out output data
 	always_ff @(posedge ap_clk) begin
-		if (layer15_out_V_data_0_V_TVALID & layer15_out_V_data_0_V_TREADY) begin
-			output_mem[0] <= layer15_out_V_data_0_V_TDATA;
-			assert(layer15_out_V_data_0_V_TDATA == output_benchmark_mem[0]);
+		if (~ap_rst_n) begin
+			output_mem <= output_mem_refresh;
 		end
-	
-		if (layer15_out_V_data_1_V_TVALID & layer15_out_V_data_1_V_TREADY) begin
-			output_mem[1] <= layer15_out_V_data_1_V_TDATA;
-			assert(layer15_out_V_data_1_V_TDATA == output_benchmark_mem[1]);
-		end
+		else begin
+
+		    if (layer15_out_V_data_0_V_TVALID & layer15_out_V_data_0_V_TREADY) begin
+			    output_mem[0] <= layer15_out_V_data_0_V_TDATA;
+			    assert(layer15_out_V_data_0_V_TDATA == output_benchmark_mem[0]);
+		    end
+
+		    if (layer15_out_V_data_1_V_TVALID & layer15_out_V_data_1_V_TREADY) begin
+			    output_mem[1] <= layer15_out_V_data_1_V_TDATA;
+			    assert(layer15_out_V_data_1_V_TDATA == output_benchmark_mem[1]);
+		    end
 		
-		if (layer15_out_V_data_2_V_TVALID & layer15_out_V_data_2_V_TREADY) begin
-			output_mem[2] <= layer15_out_V_data_2_V_TDATA;
-			assert(layer15_out_V_data_2_V_TDATA == output_benchmark_mem[2]);
-		end
+		    if (layer15_out_V_data_2_V_TVALID & layer15_out_V_data_2_V_TREADY) begin
+			    output_mem[2] <= layer15_out_V_data_2_V_TDATA;
+			    assert(layer15_out_V_data_2_V_TDATA == output_benchmark_mem[2]);
+		    end
 		
-		if (layer15_out_V_data_3_V_TVALID & layer15_out_V_data_3_V_TREADY) begin
-			output_mem[3] <= layer15_out_V_data_3_V_TDATA;
-			assert(layer15_out_V_data_3_V_TDATA == output_benchmark_mem[3]);
-		end
+		    if (layer15_out_V_data_3_V_TVALID & layer15_out_V_data_3_V_TREADY) begin
+			    output_mem[3] <= layer15_out_V_data_3_V_TDATA;
+			    assert(layer15_out_V_data_3_V_TDATA == output_benchmark_mem[3]);
+		    end
 		
-		if (layer15_out_V_data_4_V_TVALID & layer15_out_V_data_4_V_TREADY) begin
-			output_mem[4] <= layer15_out_V_data_4_V_TDATA;
-			assert(layer15_out_V_data_4_V_TDATA == output_benchmark_mem[4]);
+		    if (layer15_out_V_data_4_V_TVALID & layer15_out_V_data_4_V_TREADY) begin
+			    output_mem[4] <= layer15_out_V_data_4_V_TDATA;
+			    assert(layer15_out_V_data_4_V_TDATA == output_benchmark_mem[4]);
+		    end
+
 		end
 	end
 	
 	// Run through signal protocol to run module
+	integer run_counter = 0;
 	initial begin
 
 		//////////////////////// 1. Load input and benchmark data ////////////////////////
@@ -242,22 +250,23 @@ module myproject_testbench();
 
 		//////////////////////// 2. Wait for computation to complete ////////////////////////
 
-		// Turn on reset, turn off start
-		ap_rst_n = 0; // active low
-		ap_start = 0;
-		
-		// Turn off reset
-		#20;
-		ap_rst_n = 1;
-		
-		// Toggle start
-		#10;
-		ap_start = 1;
-		#10;
-		ap_start = 0;
-		 
-        wait(ap_done);
-		#(1000*CLOCK_PERIOD);
+        ap_start = 0; // start off to begin
+
+		repeat(5) begin
+
+		    // toggle ~ap_rst_n
+		    ap_rst_n <= 0; #(CLOCK_PERIOD); ap_rst_n <= 1; // recall, active low
+
+            // Toggle start
+		    ap_start <= 1; #(CLOCK_PERIOD); ap_start <= 0; 
+
+            // Wait for done
+			wait(ap_done); 
+
+			run_counter <= run_counter + 1;
+			$display("\n\n[INFO] Run %0d complete.", run_counter+1);
+		end 
+        
 
         //////////////////////// 3. Save output, close files ////////////////////////
         // Input-read
