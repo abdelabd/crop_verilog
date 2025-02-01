@@ -129,30 +129,29 @@ module myproject_testbench();
 		else if (conv2d_input_V_data_0_V_TVALID & conv2d_input_V_data_0_V_TREADY) begin
 			img_idx <= img_idx + 1;
 			conv2d_input_V_data_0_V_TDATA <= input_mem[img_idx];
-			$fwrite(input_read_file, "%b\n", conv2d_input_V_data_0_V_TDATA);
 		end	
 	end
 	
 	// Sequentially read out output data
 	always_ff @(posedge ap_clk) begin
 		if (layer15_out_V_data_0_V_TVALID & layer15_out_V_data_0_V_TREADY) begin
-			$fwrite(output_file, "%b\n", layer15_out_V_data_0_V_TDATA);
+			output_mem[0] <= layer15_out_V_data_0_V_TDATA;
 		end
 	
 		if (layer15_out_V_data_1_V_TVALID & layer15_out_V_data_1_V_TREADY) begin
-			$fwrite(output_file, "%b\n", layer15_out_V_data_1_V_TDATA);
+			output_mem[1] <= layer15_out_V_data_1_V_TDATA;
 		end
 		
 		if (layer15_out_V_data_2_V_TVALID & layer15_out_V_data_2_V_TREADY) begin
-			$fwrite(output_file, "%b\n", layer15_out_V_data_2_V_TDATA);
+			output_mem[2] <= layer15_out_V_data_2_V_TDATA;
 		end
 		
 		if (layer15_out_V_data_3_V_TVALID & layer15_out_V_data_3_V_TREADY) begin
-			$fwrite(output_file, "%b\n", layer15_out_V_data_3_V_TDATA);
+			output_mem[3] <= layer15_out_V_data_3_V_TDATA;
 		end
 		
 		if (layer15_out_V_data_4_V_TVALID & layer15_out_V_data_4_V_TREADY) begin
-			$fwrite(output_file, "%b\n", layer15_out_V_data_4_V_TDATA);
+			output_mem[4] <= layer15_out_V_data_4_V_TDATA;
 		end
 	end
 	
@@ -168,30 +167,16 @@ module myproject_testbench();
 		 ap_rst_n = 1;
 
 		 // Load image data from binary file
+		 $display("input_file location = %0d", $sformatf("tb_data/img_postcrop_INDEX_%0dx%0d_to_%0dx%0dx%0d.bin",
+            IN_ROWS, IN_COLS,
+            OUT_ROWS, OUT_COLS,
+            NUM_CROPS));
 		 $readmemb($sformatf("tb_data/img_postcrop_INDEX_%0dx%0d_to_%0dx%0dx%0d.bin",
             IN_ROWS, IN_COLS,
             OUT_ROWS, OUT_COLS,
             NUM_CROPS), input_mem);
-		
-		 // Open the files to which we want to write
-		 input_read_file = $fopen("tb_data/img_postcrop_INDEX_READIN_100x160_to_48x48x1.bin", "wb");
-		 if (input_read_file == 0) begin
-			  $display("Error: Could not open input-read file for writing.");
-			  $stop;
-		 end
-		 else begin
-			  $display("Could indeed open input-read file for writing.");
-		 end
-		 
-		 output_file = $fopen("tb_data/vout_postcrop_INDEX_100x160_to_48x48x1.bin", "wb");
-		 if (output_file == 0) begin
-			  $display("Error: Could not open output file for writing.");
-			  $stop;
-		 end
-		 else begin
-			  $display("Could indeed open output file for writing.");
-		 end
 
+		
 		 // Start the HLS module
 		 #10;
 		 ap_start = 1;
@@ -211,22 +196,49 @@ module myproject_testbench();
 		 //#800000;
 
 
-		$display("input_file location = %0d", $sformatf("tb_data/ap_fixed_%0d_%0d/img_postcrop_INDEX_%0dx%0d_to_%0dx%0dx%0d.bin",
+        //////////////////////// 3. Save output, close files ////////////////////////
+        // Input-read
+		input_read_file = $fopen("tb_data/img_postcrop_INDEX_READIN_100x160_to_48x48x1.bin", "wb");
+		if (input_read_file == 0) begin
+			$display("Error: Could not open input-read file for writing.");
+			$stop;
+		end
+		else begin
+			$display("Could indeed open input-read file for writing.");
+		end
+		for (i=0; i<OUT_ROWS*OUT_COLS; i=i+1) begin
+            $fwrite(input_read_file, "%b\n", input_mem[i]);
+        end
+
+		// Output
+		$display("output_file location = %0d", $sformatf("tb_data/ap_fixed_%0d_%0d/vout_INDEX_%0dx%0d_to_%0dx%0dx%0d.bin",
             FP_TOTAL,
             FP_INT,
             IN_ROWS, IN_COLS,
             OUT_ROWS, OUT_COLS,
             NUM_CROPS));
+		output_file = $fopen("tb_data/vout_postcrop_INDEX_100x160_to_48x48x1.bin", "wb");
+		if (output_file == 0) begin
+			$display("Error: Could not open output file for writing.");
+			$stop;
+		end
+		else begin
+			$display("Could indeed open output file for writing.");
+		end
+		for (i=0; i<5; i=i+1) begin
+            $fwrite(output_file, "%b\n", output_mem[i]);
+        end
+
+	
+        $fclose(input_file);
+        $fclose(input_read_file);
+        $fclose(output_file);
+
+
+		//////////////////////// 4. End sim ////////////////////////
         
-         $display("output_file location = %0d", $sformatf("tb_data/ap_fixed_%0d_%0d/vout_INDEX_%0dx%0d_to_%0dx%0dx%0d.bin",
-            FP_TOTAL,
-            FP_INT,
-            IN_ROWS, IN_COLS,
-            OUT_ROWS, OUT_COLS,
-            NUM_CROPS));
-
-
-		 $stop;
+        $display("\n\n[TB] Simulation complete.");
+		$stop;
 	end
 
 endmodule
