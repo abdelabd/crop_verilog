@@ -118,10 +118,16 @@ module myproject_testbench();
     reg [FP_TOTAL-1:0] output_mem [4:0];
 	logic [FP_TOTAL-1:0] output_benchmark_mem [OUT_ROWS*OUT_COLS-1:0];
 
+    logic [FP_TOTAL-1:0] output_mem_refresh  [4:0];
+    genvar ii;
+    for (ii=0; ii<5; ii++) begin
+        assign output_mem_refresh[ii] = 0;
+    end
+
 	// Indices to track read/write progress
-	integer img_idx;
 	integer i;
-    
+	integer img_idx;
+	
 	// File pointers
 	integer input_file, input_read_file, output_file, output_benchmark_file;
 
@@ -140,22 +146,27 @@ module myproject_testbench();
 	always_ff @(posedge ap_clk) begin
 		if (layer15_out_V_data_0_V_TVALID & layer15_out_V_data_0_V_TREADY) begin
 			output_mem[0] <= layer15_out_V_data_0_V_TDATA;
+			assert(output_benchmark_mem[0] == layer15_out_V_data_0_V_TDATA);
 		end
 	
 		if (layer15_out_V_data_1_V_TVALID & layer15_out_V_data_1_V_TREADY) begin
 			output_mem[1] <= layer15_out_V_data_1_V_TDATA;
+			assert(output_benchmark_mem[1] == layer15_out_V_data_1_V_TDATA);
 		end
 		
 		if (layer15_out_V_data_2_V_TVALID & layer15_out_V_data_2_V_TREADY) begin
 			output_mem[2] <= layer15_out_V_data_2_V_TDATA;
+			assert(output_benchmark_mem[2] == layer15_out_V_data_2_V_TDATA);
 		end
 		
 		if (layer15_out_V_data_3_V_TVALID & layer15_out_V_data_3_V_TREADY) begin
 			output_mem[3] <= layer15_out_V_data_3_V_TDATA;
+			assert(output_benchmark_mem[3] == layer15_out_V_data_3_V_TDATA);
 		end
 		
 		if (layer15_out_V_data_4_V_TVALID & layer15_out_V_data_4_V_TREADY) begin
 			output_mem[4] <= layer15_out_V_data_4_V_TDATA;
+			assert(output_benchmark_mem[4] == layer15_out_V_data_4_V_TDATA);
 		end
 	end
 	
@@ -175,6 +186,10 @@ module myproject_testbench();
             NUM_CROPS), input_mem);
 
 		// Output benchmark, against which to compare for assertions
+		$readmemb($sformatf("tb_data/vout_postcrop_benchmark_INDEX_%0dx%0d_to_%0dx%0dx%0d.bin",
+            IN_ROWS, IN_COLS,
+            OUT_ROWS, OUT_COLS,
+            NUM_CROPS), output_benchmark_mem);
 
 		//////////////////////// 2. Wait for computation to complete ////////////////////////
 
