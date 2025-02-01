@@ -158,19 +158,27 @@ module crop_plus_fifo_testbench();
 		end	
 	end
 
+    // Run through signal protocol to run module
     integer run_counter = 0;
     initial begin
 
         //////////////////////// 1. Load input and benchmark data ////////////////////////
 
         // input data
+        $display("input_file location = %0d", $sformatf("tb_data/ap_fixed_%0d_%0d/tb_input_INDEX_%0dx%0d_to_%0dx%0dx%0d.bin",
+            FP_TOTAL,
+            FP_INT,
+            IN_ROWS, IN_COLS,
+            OUT_ROWS, OUT_COLS,
+            NUM_CROPS));
         $readmemb($sformatf("tb_data/ap_fixed_%0d_%0d/tb_input_INDEX_%0dx%0d_to_%0dx%0dx%0d.bin",
             FP_TOTAL,
             FP_INT,
             IN_ROWS, IN_COLS,
             OUT_ROWS, OUT_COLS,
             NUM_CROPS), input_mem);
-
+ 
+        // Output benchmark, against which to compare for assertions
         $readmemb($sformatf("tb_data/ap_fixed_%0d_%0d/tb_benchmark_output_INDEX_%0dx%0d_to_%0dx%0dx%0d.bin",
             FP_TOTAL,
             FP_INT,
@@ -187,13 +195,6 @@ module crop_plus_fifo_testbench();
             run_counter <= run_counter + 1;
         end
         $display("\n\n[INFO] Total runs = %0d", run_counter+1);
-
-        $display("input_file location = %0d", $sformatf("tb_data/ap_fixed_%0d_%0d/tb_input_INDEX_%0dx%0d_to_%0dx%0dx%0d.bin",
-            FP_TOTAL,
-            FP_INT,
-            IN_ROWS, IN_COLS,
-            OUT_ROWS, OUT_COLS,
-            NUM_CROPS));
         
          $display("output_file location = %0d", $sformatf("tb_data/ap_fixed_%0d_%0d/tb_output_INDEX_%0dx%0d_to_%0dx%0dx%0d.bin",
             FP_TOTAL,
