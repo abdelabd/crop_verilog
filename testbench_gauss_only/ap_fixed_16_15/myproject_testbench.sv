@@ -116,9 +116,13 @@ module myproject_testbench();
 	// I/O memory
 	reg [FP_TOTAL-1:0] input_mem [OUT_ROWS*OUT_COLS-1:0];
     reg [FP_TOTAL-1:0] output_mem [4:0];
+	logic [FP_TOTAL-1:0] output_benchmark_mem [OUT_ROWS*OUT_COLS-1:0];
+
+	// Indices to track read/write progress
 	integer img_idx;
 	integer i;
     
+	// File pointers
 	integer input_file, input_read_file, output_file, output_benchmark_file;
 
 	// Sequentially read in input data
@@ -155,46 +159,41 @@ module myproject_testbench();
 		end
 	end
 	
-	// Run through the signal protocol to read in the data
+	// Run through signal protocol to run module
 	initial begin
-	
-		 // Turn on reset, turn off start
-		ap_rst_n = 0; // active low
-		ap_start = 0;
-		
-		 // Turn off reset
-		 #20;
-		 ap_rst_n = 1;
 
-		 // Load image data from binary file
-		 $display("input_file location = %0d", $sformatf("tb_data/img_postcrop_INDEX_%0dx%0d_to_%0dx%0dx%0d.bin",
+		//////////////////////// 1. Load input and benchmark data ////////////////////////
+	    
+		// input data
+		$display("input_file location = %0d", $sformatf("tb_data/img_postcrop_INDEX_%0dx%0d_to_%0dx%0dx%0d.bin",
             IN_ROWS, IN_COLS,
             OUT_ROWS, OUT_COLS,
             NUM_CROPS));
-		 $readmemb($sformatf("tb_data/img_postcrop_INDEX_%0dx%0d_to_%0dx%0dx%0d.bin",
+		$readmemb($sformatf("tb_data/img_postcrop_INDEX_%0dx%0d_to_%0dx%0dx%0d.bin",
             IN_ROWS, IN_COLS,
             OUT_ROWS, OUT_COLS,
             NUM_CROPS), input_mem);
 
+		// Output benchmark, against which to compare for assertions
+
+		//////////////////////// 2. Wait for computation to complete ////////////////////////
+
+		// Turn on reset, turn off start
+		ap_rst_n = 0; // active low
+		ap_start = 0;
 		
-		 // Start the HLS module
-		 #10;
-		 ap_start = 1;
-		 #10;
-		 ap_start = 0;
+		// Turn off reset
+		#20;
+		ap_rst_n = 1;
+		
+		// Toggle start
+		#10;
+		ap_start = 1;
+		#10;
+		ap_start = 0;
 		 
-
-
-//		
-//		 // Close the output file
-//		 $fclose(output_file);
-//
-//		 // End simulation
-//		 #20;
         wait(ap_done);
 		#(1000*CLOCK_PERIOD);
-		 //#800000;
-
 
         //////////////////////// 3. Save output, close files ////////////////////////
         // Input-read
@@ -229,11 +228,9 @@ module myproject_testbench();
             $fwrite(output_file, "%b\n", output_mem[i]);
         end
 
-	
         $fclose(input_file);
         $fclose(input_read_file);
         $fclose(output_file);
-
 
 		//////////////////////// 4. End sim ////////////////////////
         
