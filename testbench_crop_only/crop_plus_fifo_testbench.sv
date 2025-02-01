@@ -4,15 +4,16 @@ module crop_plus_fifo_testbench();
 
     //////////////////////// User parameters ////////////////////////
     localparam FP_TOTAL = 8;
+    localparam FP_FRAC = 0;
+    localparam FP_INT = FP_TOTAL - FP_FRAC - 1;
+
     localparam IN_ROWS         = 9;
     localparam IN_COLS         = 9;
     localparam OUT_ROWS        = 3;
     localparam OUT_COLS        = 3;
     localparam Y_1             = 2;
     localparam X_1             = 2;
-    localparam FP_FRAC = 0; // adjust if needed
-    localparam FP_INT = FP_TOTAL - FP_FRAC - 1;
-    localparam NUM_CROPS = 1; // how many “crops”/frames you want to process
+    localparam NUM_CROPS       = 1; 
 
     //////////////////////// DUT signals ////////////////////////
     reg                         clk;
@@ -45,7 +46,6 @@ module crop_plus_fifo_testbench();
     );
 
     //////////////////////// Generate clock ////////////////////////
-    
     parameter CLOCK_PERIOD=10;  
 	initial begin  
 		clk <= 0;  
@@ -101,9 +101,9 @@ module crop_plus_fifo_testbench();
         end
 	end
 
-    //////////////////////// File-handling ////////////////////////
+    //////////////////////// I/O data ////////////////////////
 
-    // Testbench I/O memory
+    // I/O memory
     logic [FP_TOTAL-1:0] input_mem  [IN_ROWS*IN_COLS-1:0];
     logic [FP_TOTAL-1:0] output_mem [OUT_ROWS*OUT_COLS-1:0];
     logic [FP_TOTAL-1:0] output_benchmark_mem [OUT_ROWS*OUT_COLS-1:0];
@@ -114,7 +114,6 @@ module crop_plus_fifo_testbench();
     for (ii=0; ii<OUT_ROWS*OUT_COLS; ii++) begin
         assign output_mem_refresh[ii] = 0;
     end
-
 
     // Indices to track read/write progress
     integer i;

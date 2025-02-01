@@ -2,8 +2,9 @@
 
 module myproject_testbench();
 
+    //////////////////////// User parameters ////////////////////////
     localparam FP_TOTAL = 16;
-    localparam FP_FRAC = 0; // adjust if needed
+    localparam FP_FRAC = 0;
     localparam FP_INT = FP_TOTAL - FP_FRAC - 1;
 
     localparam IN_ROWS         = 100;
@@ -12,9 +13,9 @@ module myproject_testbench();
     localparam OUT_COLS        = 48;
     localparam Y_1             = 10;
     localparam X_1             = 10;
-    localparam NUM_CROPS = 1; // how many “crops”/frames you want to process
+    localparam NUM_CROPS       = 1; 
 
-	// Parameters for the HLS module
+	//////////////////////// DUT signals ////////////////////////
 	reg ap_clk; //input
 	reg ap_rst_n; //input
 	reg ap_start; //input
@@ -52,7 +53,7 @@ module myproject_testbench();
 	wire layer15_out_V_data_4_V_TVALID; // output: myproject output valid to be sent
     reg layer15_out_V_data_4_V_TREADY; //input: receiver ready to receive myproject output
 
-	// Instantiate the HLS module (Replace 'hls_module' with actual module name)
+	//////////////////////// DUT module ////////////////////////
 	myproject dut (
 		  .conv2d_input_V_data_0_V_TDATA(conv2d_input_V_data_0_V_TDATA),
           .layer15_out_V_data_0_V_TDATA(layer15_out_V_data_0_V_TDATA),
@@ -87,25 +88,40 @@ module myproject_testbench();
 	);
 	
 
-	// Clock generation
+	//////////////////////// Generate clock ////////////////////////
 	parameter CLOCK_PERIOD = 10;
 	initial begin
 		 ap_clk = 0;
 		 forever #(CLOCK_PERIOD/2) ap_clk = ~ap_clk; // 100MHz clock
 	end
 
-	// Image data array
+    //////////////////////// Randomize handshake signals ////////////////////////
+
+    // input-valid
+	always_ff @(posedge ap_clk) begin
+		conv2d_input_V_data_0_V_TVALID <= $urandom%2;
+	end
+
+	// output-ready
+	always_ff @(posedge ap_clk) begin
+		layer15_out_V_data_0_V_TREADY <= $urandom%2;
+		layer15_out_V_data_1_V_TREADY <= $urandom%2;
+		layer15_out_V_data_2_V_TREADY <= $urandom%2;
+		layer15_out_V_data_3_V_TREADY <= $urandom%2;
+		layer15_out_V_data_4_V_TREADY <= $urandom%2;
+	end
+	
+	//////////////////////// I/O data ////////////////////////
+
+	// I/O memory
 	reg [FP_TOTAL-1:0] input_mem [OUT_ROWS*OUT_COLS-1:0];
     reg [FP_TOTAL-1:0] output_mem [4:0];
 	integer img_idx;
 	integer i;
-//
-//	// File handling
-	integer input_file;
-	integer input_read_file;
-	integer output_file;
+    
+	integer input_file, input_read_file, output_file, output_benchmark_file;
 
-	// Sequentially read in image data
+	// Sequentially read in input data
 	always_ff @(posedge ap_clk) begin
 		if (~ap_rst_n) begin
 			img_idx <= 0;
@@ -140,20 +156,6 @@ module myproject_testbench();
 		end
 	end
 	
-	// randomize the input-valid signal
-	always_ff @(posedge ap_clk) begin
-		conv2d_input_V_data_0_V_TVALID <= $urandom%2;
-	end
-
-	// randomize the output-ready signal
-	always_ff @(posedge ap_clk) begin
-		layer15_out_V_data_0_V_TREADY <= $urandom%2;
-		layer15_out_V_data_1_V_TREADY <= $urandom%2;
-		layer15_out_V_data_2_V_TREADY <= $urandom%2;
-		layer15_out_V_data_3_V_TREADY <= $urandom%2;
-		layer15_out_V_data_4_V_TREADY <= $urandom%2;
-	end
-	
 	// Run through the signal protocol to read in the data
 	initial begin
 	
@@ -161,14 +163,6 @@ module myproject_testbench();
 		ap_rst_n = 0; // active low
 		ap_start = 0;
 		
-		// Turn on input-valid, output-ready 
-//		conv2d_input_V_data_0_V_TVALID = 1;
-//		layer15_out_V_data_0_V_TREADY = 1;
-//		layer15_out_V_data_1_V_TREADY = 1;
-//		layer15_out_V_data_2_V_TREADY = 1;
-//		layer15_out_V_data_3_V_TREADY = 1;
-//		layer15_out_V_data_4_V_TREADY = 1;
-
 		 // Turn off reset
 		 #20;
 		 ap_rst_n = 1;
