@@ -95,20 +95,69 @@ module myproject_testbench();
 		 forever #(CLOCK_PERIOD/2) ap_clk = ~ap_clk; // 100MHz clock
 	end
 
+	integer cc_counter; // cycle counter
+    always_ff @(posedge clk) begin
+        if (reset) begin
+            cc_counter <= 0;
+        end
+        else begin
+            cc_counter <= cc_counter + 1;
+        end
+    end
+
     //////////////////////// Randomize handshake signals ////////////////////////
 
-    // input-valid
-	always_ff @(posedge ap_clk) begin
-		conv2d_input_V_data_0_V_TVALID <= $urandom%2;
+    // 1. valid-ready = 00
+    // 2. valid-ready = 10
+    // 3. valid-ready = 01
+    // 4. valid-ready = 11 (both random)
+
+	always_ff @(posedge clk) begin
+        if (cc_counter < 2*OUT_ROWS*OUT_COLS) begin
+            conv2d_input_V_data_0_V_TVALID <= 1'b0;
+        end
+        else if (cc_counter < 4*OUT_ROWS*OUT_COLS) begin
+            conv2d_input_V_data_0_V_TVALID <= 1'b1;
+        end
+        else if (cc_counter < 6*OUT_ROWS*OUT_COLS) begin
+            conv2d_input_V_data_0_V_TVALID <= 1'b0;
+        end
+        else begin
+            conv2d_input_V_data_0_V_TVALID <= $urandom%2;
+        end
 	end
 
 	// output-ready
-	always_ff @(posedge ap_clk) begin
-		layer15_out_V_data_0_V_TREADY <= $urandom%2;
-		layer15_out_V_data_1_V_TREADY <= $urandom%2;
-		layer15_out_V_data_2_V_TREADY <= $urandom%2;
-		layer15_out_V_data_3_V_TREADY <= $urandom%2;
-		layer15_out_V_data_4_V_TREADY <= $urandom%2;
+
+	always_ff @(posedge clk) begin
+        if (cc_counter < 2*OUT_ROWS*OUT_COLS) begin
+            layer15_out_V_data_0_V_TREADY <= 1'b0;
+			layer15_out_V_data_1_V_TREADY <= 1'b0;
+			layer15_out_V_data_2_V_TREADY <= 1'b0;
+			layer15_out_V_data_3_V_TREADY <= 1'b0;
+			layer15_out_V_data_4_V_TREADY <= 1'b0;
+        end
+        else if (cc_counter < 4*OUT_ROWS*OUT_COLS) begin
+            layer15_out_V_data_0_V_TREADY <= 1'b0;
+			layer15_out_V_data_1_V_TREADY <= 1'b0;
+			layer15_out_V_data_2_V_TREADY <= 1'b0;
+			layer15_out_V_data_3_V_TREADY <= 1'b0;
+			layer15_out_V_data_4_V_TREADY <= 1'b0;
+        end
+        else if (cc_counter < 6*OUT_ROWS*OUT_COLS) begin
+            layer15_out_V_data_0_V_TREADY <= 1'b1;
+			layer15_out_V_data_1_V_TREADY <= 1'b1;
+			layer15_out_V_data_2_V_TREADY <= 1'b1;
+			layer15_out_V_data_3_V_TREADY <= 1'b1;
+			layer15_out_V_data_4_V_TREADY <= 1'b1;
+        end
+        else begin
+			layer15_out_V_data_0_V_TREADY <= $urandom%2;
+			layer15_out_V_data_1_V_TREADY <= $urandom%2;
+			layer15_out_V_data_2_V_TREADY <= $urandom%2;
+			layer15_out_V_data_3_V_TREADY <= $urandom%2;
+			layer15_out_V_data_4_V_TREADY <= $urandom%2;
+        end
 	end
 	
 	//////////////////////// I/O data ////////////////////////
