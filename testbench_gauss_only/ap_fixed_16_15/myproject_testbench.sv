@@ -283,9 +283,7 @@ module myproject_testbench();
         end
 
 		// Output
-		$display("output_file location = %0d", $sformatf("tb_data/ap_fixed_%0d_%0d/vout_INDEX_%0dx%0d_to_%0dx%0dx%0d.bin",
-            FP_TOTAL,
-            FP_INT,
+		$display("output_file location = %0d", $sformatf("tb_data/vout_postcrop_INDEX_%0dx%0d_to_%0dx%0dx%0d.bin",
             IN_ROWS, IN_COLS,
             OUT_ROWS, OUT_COLS,
             NUM_CROPS));
