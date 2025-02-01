@@ -19,7 +19,7 @@ add wave -noupdate -label dut::fifo::count /crop_plus_fifo_testbench/dut/fifo_sy
 add wave -noupdate -label dut::crop_filter::pass_filter /crop_plus_fifo_testbench/dut/crop_filter_inst/pass_filter
 add wave -noupdate /crop_plus_fifo_testbench/run_counter
 TreeUpdate [SetDefaultTree]
-WaveRestoreCursors {{Cursor 1} {33899350000 ps} 0}
+WaveRestoreCursors {{Cursor 1} {14714027121 ps} 0}
 quietly wave cursor active 1
 configure wave -namecolwidth 150
 configure wave -valuecolwidth 100
@@ -35,4 +35,4 @@ configure wave -griddelta 40
 configure wave -timeline 0
 configure wave -timelineunits ps
 update
-WaveRestoreZoom {0 ps} {59408748 ns}
+WaveRestoreZoom {0 ps} {5940852750 ps}

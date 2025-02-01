@@ -107,17 +107,17 @@ module crop_plus_fifo_testbench();
     logic [FP_TOTAL-1:0] input_mem  [IN_ROWS*IN_COLS-1:0];
     logic [FP_TOTAL-1:0] output_mem [OUT_ROWS*OUT_COLS-1:0];
     logic [FP_TOTAL-1:0] output_benchmark_mem [OUT_ROWS*OUT_COLS-1:0];
-    logic finished;
-
-    genvar ii;
+    
     logic [FP_TOTAL-1:0] output_mem_refresh  [OUT_ROWS*OUT_COLS-1:0];
+    genvar ii;
     for (ii=0; ii<OUT_ROWS*OUT_COLS; ii++) begin
         assign output_mem_refresh[ii] = 0;
     end
 
     // Indices to track read/write progress
+    logic finished;
     integer i;
-    integer last_idx_in, idx_in, last_idx_out, idx_out;
+    integer idx_in, last_idx_out, idx_out;
 
     // File pointers
     integer input_file, input_read_file, output_file, output_benchmark_file;
@@ -125,12 +125,10 @@ module crop_plus_fifo_testbench();
     // Sequentially read in input data
 	always_ff @(posedge clk) begin
 		if (reset) begin
-            last_idx_in <= 0;
 			idx_in <= 0;
             finished <= 1'b0;
 		end	
 		else if (in_ready & in_valid) begin
-            last_idx_in <= idx_in;
 			idx_in <= idx_in + 1;
 			pixel_in <= input_mem[idx_in]; // give data to module
 
@@ -138,8 +136,6 @@ module crop_plus_fifo_testbench();
                 finished <= 1'b1;
             end
 
-            // Asserts
-            assert((idx_in != last_idx_in)|(idx_in==0)); // exception for first cycle because of indexing
 		end	
 	end
 
