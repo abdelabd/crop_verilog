@@ -66,7 +66,7 @@ vsim -voptargs="+acc" -t 1ps -lib work myproject_testbench
 # Source the wave do file
 #     This should be the file that sets up the signal window for
 #     the module you are testing.
-do myproject_wave.do
+do myproject_testbench_wave.do
 
 # Set the window types
 view wave

@@ -27,7 +27,7 @@ add wave -noupdate -label out_0_VALID /myproject_testbench/layer15_out_V_data_0_
 add wave -noupdate -label out_0_READY /myproject_testbench/layer15_out_V_data_0_V_TREADY
 add wave -noupdate -label out_0_DATA /myproject_testbench/layer15_out_V_data_0_V_TDATA
 TreeUpdate [SetDefaultTree]
-WaveRestoreCursors {{Cursor 1} {9105000 ps} 0}
+WaveRestoreCursors {{Cursor 1} {2453743 ps} 0}
 quietly wave cursor active 1
 configure wave -namecolwidth 209
 configure wave -valuecolwidth 100
