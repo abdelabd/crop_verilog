@@ -18,6 +18,7 @@ add wave -noupdate -label dut::fifo::in_valid /crop_plus_fifo_testbench/dut/fifo
 add wave -noupdate -label dut::fifo::count /crop_plus_fifo_testbench/dut/fifo_sync_inst/count
 add wave -noupdate -label dut::crop_filter::pass_filter /crop_plus_fifo_testbench/dut/crop_filter_inst/pass_filter
 add wave -noupdate /crop_plus_fifo_testbench/run_counter
+add wave -noupdate /crop_plus_fifo_testbench/cc_counter
 TreeUpdate [SetDefaultTree]
 WaveRestoreCursors {{Cursor 1} {14714027121 ps} 0}
 quietly wave cursor active 1
