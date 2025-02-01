@@ -190,7 +190,7 @@ module crop_plus_fifo_testbench();
 
         // Let's run it several times
         repeat(1000) begin 
-            reset <= 1'b1; #(CLOCK_PERIOD*2); reset <= 1'b0; 
+            reset <= 1'b1; #(CLOCK_PERIOD); reset <= 1'b0; 
             wait(finished);
             run_counter <= run_counter + 1;
         end
