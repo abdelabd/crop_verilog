@@ -46,7 +46,7 @@ module crop_plus_fifo_testbench();
 
     //////////////////////// Generate clock ////////////////////////
     
-    parameter CLOCK_PERIOD=100;  
+    parameter CLOCK_PERIOD=10;  
 	initial begin  
 		clk <= 0;  
 		forever #(CLOCK_PERIOD/2) clk <= ~clk; // Forever toggle the clock 
