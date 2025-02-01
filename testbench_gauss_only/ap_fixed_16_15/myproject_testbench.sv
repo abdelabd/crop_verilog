@@ -146,27 +146,27 @@ module myproject_testbench();
 	always_ff @(posedge ap_clk) begin
 		if (layer15_out_V_data_0_V_TVALID & layer15_out_V_data_0_V_TREADY) begin
 			output_mem[0] <= layer15_out_V_data_0_V_TDATA;
-			assert(output_benchmark_mem[0] == layer15_out_V_data_0_V_TDATA);
+			assert(layer15_out_V_data_0_V_TDATA == output_benchmark_mem[0]);
 		end
 	
 		if (layer15_out_V_data_1_V_TVALID & layer15_out_V_data_1_V_TREADY) begin
 			output_mem[1] <= layer15_out_V_data_1_V_TDATA;
-			assert(output_benchmark_mem[1] == layer15_out_V_data_1_V_TDATA);
+			assert(layer15_out_V_data_1_V_TDATA == output_benchmark_mem[1]);
 		end
 		
 		if (layer15_out_V_data_2_V_TVALID & layer15_out_V_data_2_V_TREADY) begin
 			output_mem[2] <= layer15_out_V_data_2_V_TDATA;
-			assert(output_benchmark_mem[2] == layer15_out_V_data_2_V_TDATA);
+			assert(layer15_out_V_data_2_V_TDATA == output_benchmark_mem[2]);
 		end
 		
 		if (layer15_out_V_data_3_V_TVALID & layer15_out_V_data_3_V_TREADY) begin
 			output_mem[3] <= layer15_out_V_data_3_V_TDATA;
-			assert(output_benchmark_mem[3] == layer15_out_V_data_3_V_TDATA);
+			assert(layer15_out_V_data_3_V_TDATA == output_benchmark_mem[3]);
 		end
 		
 		if (layer15_out_V_data_4_V_TVALID & layer15_out_V_data_4_V_TREADY) begin
 			output_mem[4] <= layer15_out_V_data_4_V_TDATA;
-			assert(output_benchmark_mem[4] == layer15_out_V_data_4_V_TDATA);
+			assert(layer15_out_V_data_4_V_TDATA == output_benchmark_mem[4]);
 		end
 	end
 	
