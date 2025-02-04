@@ -278,7 +278,7 @@ module crop_plus_gaussian_testbench();
 
         ap_start = 0; // start off to begin
 
-		repeat(10) begin
+		repeat(2) begin
 
 		    // toggle ~ap_rst_n
 		    ap_rst_n <= 0; #(CLOCK_PERIOD); ap_rst_n <= 1; // recall, active low

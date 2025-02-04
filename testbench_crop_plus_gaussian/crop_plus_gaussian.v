@@ -85,8 +85,8 @@ module crop_plus_gaussian #( // Has all the same inputs and outputs as myproject
         .out_valid (crop_output_TVALID)
     );
 
-
-    myproject_small myproject_small_inst (
+    // Then the hls4ml model
+    myproject myproject_inst (
 		  .conv2d_1_input_V_data_0_V_TDATA(crop_output_TDATA),
           .layer9_out_V_data_0_V_TDATA(cnn_output_0_TDATA),
 		  .layer9_out_V_data_1_V_TDATA(cnn_output_1_TDATA),

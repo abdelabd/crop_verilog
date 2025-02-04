@@ -37,7 +37,7 @@ vlog "./dense_wrapper_ap_fixed_16_15_5_3_0_ap_fixed_16_15_5_3_0_config7_s_w7_V.v
 vlog "./conv_2d_cl_array_ap_fixed_1u_array_ap_fixed_16_15_5_3_0_2u_config2_s.v"
 vlog "./myproject_mux_164_16_1_1.v"
 vlog "./relu_array_ap_fixed_10u_array_ap_fixed_16_15_5_3_0_10u_relu_config8_s.v"
-vlog "./myproject_small.v"
+vlog "./myproject.v"
 vlog "./dense_wrapper_ap_fixed_16_15_5_3_0_ap_fixed_16_15_5_3_0_config9_s_w9_V.v"
 vlog "./shift_line_buffer_array_ap_fixed_16_15_5_3_0_1u_config2_s_line_buffer_Array_Vbkb.v"
 vlog "./dense_resource_ap_fixed_ap_fixed_16_15_5_3_0_config2_mult_s_w2_V.v"

@@ -1,6 +1,6 @@
 `timescale 1 ns / 1 ps 
 
-module myproject_small_testbench();
+module myproject_testbench();
 
     //////////////////////// User parameters ////////////////////////
     localparam FP_TOTAL = 16;
@@ -54,7 +54,7 @@ module myproject_small_testbench();
     reg layer9_out_V_data_4_V_TREADY; //input: receiver ready to receive myproject output
 
 	//////////////////////// DUT module ////////////////////////
-	myproject_small dut (
+	myproject dut (
 		  .conv2d_1_input_V_data_0_V_TDATA(conv2d_1_input_V_data_0_V_TDATA),
           .layer9_out_V_data_0_V_TDATA(layer9_out_V_data_0_V_TDATA),
 		  .layer9_out_V_data_1_V_TDATA(layer9_out_V_data_1_V_TDATA),
