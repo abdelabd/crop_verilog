@@ -278,7 +278,7 @@ module crop_plus_gaussian_testbench();
 
         ap_start = 0; // start off to begin
 
-		// repeat(2) begin
+		repeat(10) begin
 
 		    // toggle ~ap_rst_n
 		    ap_rst_n <= 0; #(CLOCK_PERIOD); ap_rst_n <= 1; // recall, active low
@@ -291,7 +291,7 @@ module crop_plus_gaussian_testbench();
 
 			run_counter <= run_counter + 1;
 			$display("\n\n[INFO] Run %0d complete.", run_counter+1);
-		// end 
+		end 
 
         //////////////////////// 3. Save output, close files ////////////////////////
         // Input-read

@@ -40,9 +40,9 @@ module crop_plus_fifo #(
             .out_ready(intermediate_in_ready),
             .out_valid(intermediate_out_valid));
 
-    first_word_fall_through_fifo #(
+    fifo_sync #(
         .DATA_WIDTH(PIXEL_BIT_WIDTH),
-        .DEPTH(OUT_ROWS*OUT_COLS))
+        .FIFO_DEPTH(OUT_ROWS*OUT_COLS))
         fifo_sync_inst(
             .clk(clk),
             .reset(reset),
