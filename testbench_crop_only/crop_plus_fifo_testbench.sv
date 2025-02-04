@@ -236,8 +236,6 @@ module crop_plus_fifo_testbench();
         end
         
 
-        $fclose(input_file);
-        $fclose(output_benchmark_file);
         $fclose(input_read_file);
         $fclose(output_file);
         

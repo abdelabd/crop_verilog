@@ -162,6 +162,27 @@ module myproject_small_testbench();
 	
 	//////////////////////// I/O data ////////////////////////
 
+    string input_file_location = $sformatf("tb_data/ap_fixed_%0d_%0d_SMALL/img_postcrop_INDEX_%0dx%0d_to_%0dx%0dx%0d.bin",
+            FP_TOTAL, FP_INT,
+			IN_ROWS, IN_COLS,
+            OUT_ROWS, OUT_COLS,
+            NUM_CROPS);
+    string input_read_file_location = $sformatf("tb_data/ap_fixed_%0d_%0d_SMALL/img_postcrop_INDEX_READIN_%0dx%0d_to_%0dx%0dx%0d.bin",
+		    FP_TOTAL, FP_INT,
+			IN_ROWS, IN_COLS,
+            OUT_ROWS, OUT_COLS,
+            NUM_CROPS);
+    string output_benchmark_file_location = $sformatf("tb_data/ap_fixed_%0d_%0d_SMALL/cnn_pred_benchmark_INDEX_%0dx%0d_to_%0dx%0dx%0d.bin",
+            FP_TOTAL, FP_INT,
+			IN_ROWS, IN_COLS,
+            OUT_ROWS, OUT_COLS,
+            NUM_CROPS);
+    string output_file_location = $sformatf("tb_data/ap_fixed_%0d_%0d_SMALL/cnn_pred_INDEX_%0dx%0d_to_%0dx%0dx%0d.bin",
+            FP_TOTAL, FP_INT,
+			IN_ROWS, IN_COLS,
+            OUT_ROWS, OUT_COLS,
+            NUM_CROPS);
+
 	// I/O memory
 	reg [FP_TOTAL-1:0] input_mem [OUT_ROWS*OUT_COLS-1:0];
     reg [FP_TOTAL-1:0] output_mem [4:0];
@@ -230,29 +251,25 @@ module myproject_small_testbench();
 	integer run_counter = 0;
 	initial begin
 
+		$display("input_file_location = %0d", input_file_location);
+		$display("output_benchmark_file_location = %0d", output_benchmark_file_location);
+		$display("input_read_file_location = %0d", input_read_file_location);
+		$display("output_file_location = %0d", output_file_location);
+
 		//////////////////////// 1. Load input and benchmark data ////////////////////////
 	    
 		// input data
-		$display("input_file location = %0d", $sformatf("tb_data/img_postcrop_INDEX_%0dx%0d_to_%0dx%0dx%0d.bin",
-            IN_ROWS, IN_COLS,
-            OUT_ROWS, OUT_COLS,
-            NUM_CROPS));
-		$readmemb($sformatf("tb_data/img_postcrop_INDEX_%0dx%0d_to_%0dx%0dx%0d.bin",
-            IN_ROWS, IN_COLS,
-            OUT_ROWS, OUT_COLS,
-            NUM_CROPS), input_mem);
+		
+		$readmemb(input_file_location, input_mem);
 
 		// Output benchmark, against which to compare for assertions
-		$readmemb($sformatf("tb_data/vout_postcrop_benchmark_INDEX_%0dx%0d_to_%0dx%0dx%0d.bin",
-            IN_ROWS, IN_COLS,
-            OUT_ROWS, OUT_COLS,
-            NUM_CROPS), output_benchmark_mem);
+		$readmemb(output_benchmark_file_location, output_benchmark_mem);
 
 		//////////////////////// 2. Wait for computation to complete ////////////////////////
 
         ap_start = 0; // start off to begin
 
-		repeat(10) begin
+		repeat(2) begin
 
 		    // toggle ~ap_rst_n
 		    ap_rst_n <= 0; #(CLOCK_PERIOD); ap_rst_n <= 1; // recall, active low
@@ -269,7 +286,7 @@ module myproject_small_testbench();
 
         //////////////////////// 3. Save output, close files ////////////////////////
         // Input-read
-		input_read_file = $fopen("tb_data/img_postcrop_INDEX_READIN_100x160_to_48x48x1.bin", "wb");
+		input_read_file = $fopen(input_read_file_location, "wb");
 		if (input_read_file == 0) begin
 			$display("Error: Could not open input-read file for writing.");
 			$stop;
@@ -282,11 +299,8 @@ module myproject_small_testbench();
         end
 
 		// Output
-		$display("output_file location = %0d", $sformatf("tb_data/vout_postcrop_INDEX_%0dx%0d_to_%0dx%0dx%0d.bin",
-            IN_ROWS, IN_COLS,
-            OUT_ROWS, OUT_COLS,
-            NUM_CROPS));
-		output_file = $fopen("tb_data/vout_postcrop_INDEX_100x160_to_48x48x1.bin", "wb");
+		$display("output_file_location = %0d", output_file_location);
+		output_file = $fopen(output_file_location, "wb");
 		if (output_file == 0) begin
 			$display("Error: Could not open output file for writing.");
 			$stop;
@@ -298,7 +312,6 @@ module myproject_small_testbench();
             $fwrite(output_file, "%b\n", output_mem[i]);
         end
 
-        $fclose(input_file);
         $fclose(input_read_file);
         $fclose(output_file);
 
