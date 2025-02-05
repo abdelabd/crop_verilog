@@ -92,6 +92,12 @@ module crop_filter_testbench();
     logic [FP_TOTAL-1:0] input_mem  [IN_ROWS*IN_COLS-1:0];
     logic [FP_TOTAL-1:0] output_mem [OUT_ROWS*OUT_COLS-1:0];
     logic [FP_TOTAL-1:0] output_benchmark_mem [OUT_ROWS*OUT_COLS-1:0];
+    logic [FP_TOTAL-1:0] output_mem_refresh  [OUT_ROWS*OUT_COLS-1:0];
+    genvar ii;
+    for (ii=0; ii<5; ii++) begin
+        assign output_mem_refresh[ii] = 0;
+    end
+
     logic finished;
 
     // Indices to track read/write progress
@@ -127,6 +133,7 @@ module crop_filter_testbench();
 		if (reset) begin
             last_idx_out <= 0;
 			idx_out <= 0;
+            output_mem <= output_mem_refresh;
 		end	
 		else if (out_ready & out_valid) begin
             last_idx_out <= idx_out;
@@ -141,6 +148,7 @@ module crop_filter_testbench();
 		end	
 	end
 
+    integer run_counter = 0;
     initial begin
 
         $display("\ninput_file_location = %0d", input_file_location);
@@ -159,9 +167,11 @@ module crop_filter_testbench();
         //////////////////////// 2. Wait for computation to complete ////////////////////////
 
         // Toggle reset
-        reset = 1'b1;  #(CLOCK_PERIOD*2); reset = 1'b0; #10;
-        
-        wait(finished);
+        repeat(100) begin
+            reset <= 1'b1;  #(CLOCK_PERIOD*2); reset <= 1'b0; 
+            wait(finished);
+            run_counter <= run_counter + 1;
+        end
 
         //////////////////////// 3. Save output, close files ////////////////////////
         // Input-read
@@ -195,6 +205,7 @@ module crop_filter_testbench();
         
         //////////////////////// 5. End sim ////////////////////////
         
+        $display("\n\n[INFO] Total runs = %0d", run_counter+1);
         $display("[TB] Simulation complete.");
         $stop;
     end
