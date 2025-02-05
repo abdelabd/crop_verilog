@@ -297,21 +297,29 @@ module crop_plus_gaussian_testbench();
 
         ap_start = 0; // start off to begin
 
-		repeat(2) begin
+		repeat(4) begin
 
 		    // toggle ~ap_rst_n
-		    ap_rst_n <= 0; #(CLOCK_PERIOD); ap_rst_n <= 1; // recall, active low
+		    @(posedge ap_clk) ap_rst_n <= 0; @(posedge ap_clk) ap_rst_n <= 1; // recall, ap_rst_n is active low
 
             // Toggle start
-		    ap_start <= 1; #(CLOCK_PERIOD); ap_start <= 0; 
+		    @(posedge ap_clk) ap_start <= 1; @(posedge ap_clk) ap_start <= 0; 
 
-			crop_Y1_TVALID <= 1'b1; crop_X1_TVALID <= 1'b1; #(CLOCK_PERIOD*2); crop_Y1_TVALID <= 1'b0; crop_X1_TVALID <= 1'b0;
+			// Toggle crop_Y1_TVALID and crop_X1_TVALID
+			@(posedge ap_clk) begin
+				crop_Y1_TVALID <= 1'b1; 
+				crop_X1_TVALID <= 1'b1; 
+			end
+			@(posedge ap_clk) begin 
+				crop_Y1_TVALID <= 1'b0; 
+				crop_X1_TVALID <= 1'b0;
+			end
 			
             // Wait for done
-			wait(ap_done); //#(10*CLOCK_PERIOD); // Gives time to save
-
-			run_counter <= run_counter + 1;
-			$display("\n\n[INFO] Run %0d complete.", run_counter+1);
+			@(posedge ap_done) begin
+				run_counter <= run_counter + 1;
+				$display("\n\n[INFO] Run %0d complete.", run_counter+1);
+			end
 		end 
 
         //////////////////////// 3. Save output, close files ////////////////////////
