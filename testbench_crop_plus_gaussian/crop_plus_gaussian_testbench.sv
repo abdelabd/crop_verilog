@@ -137,6 +137,7 @@ module crop_plus_gaussian_testbench();
     // 3. valid-ready = 01
     // 4. valid-ready = 11 (both random)
 
+	// img_input_TVALID
 	always_ff @(posedge ap_clk) begin
         if (cc_counter < 2*OUT_ROWS*OUT_COLS) begin
             img_input_TVALID <= 1'b0;
@@ -152,8 +153,19 @@ module crop_plus_gaussian_testbench();
         end
 	end
 
-	// output-ready
+	// crop_Y1_TVALID and crop_X1_TVALID
+	always_ff @(posedge ap_clk) begin
+		if (cc_counter==0) begin
+			crop_Y1_TVALID <= 1'b1;
+			crop_X1_TVALID <= 1'b1;
+		end
+		else begin
+			crop_Y1_TVALID <= 1'b0;
+			crop_X1_TVALID <= 1'b0;
+		end
+	end
 
+	// cnn_output_TREADY
 	always_ff @(posedge ap_clk) begin
         if (cc_counter < 2*OUT_ROWS*OUT_COLS) begin
             cnn_output_0_TREADY <= 1'b0;
@@ -184,6 +196,8 @@ module crop_plus_gaussian_testbench();
 			cnn_output_4_TREADY <= $urandom%2;
         end
 	end
+
+
 	
 	//////////////////////// I/O data ////////////////////////
 
@@ -297,25 +311,15 @@ module crop_plus_gaussian_testbench();
 
         ap_start = 0; // start off to begin
 
-		repeat(4) begin
+		repeat(3) begin
 
-		    // toggle ~ap_rst_n
+		    // toggle ap_rst_n
 		    @(posedge ap_clk) ap_rst_n <= 0; @(posedge ap_clk) ap_rst_n <= 1; // recall, ap_rst_n is active low
 
-            // Toggle start
+            // Toggle ap_start
 		    @(posedge ap_clk) ap_start <= 1; @(posedge ap_clk) ap_start <= 0; 
-
-			// Toggle crop_Y1_TVALID and crop_X1_TVALID
-			@(posedge ap_clk) begin
-				crop_Y1_TVALID <= 1'b1; 
-				crop_X1_TVALID <= 1'b1; 
-			end
-			@(posedge ap_clk) begin 
-				crop_Y1_TVALID <= 1'b0; 
-				crop_X1_TVALID <= 1'b0;
-			end
 			
-            // Wait for done
+            // Wait for ap_done
 			@(posedge ap_done) begin
 				run_counter <= run_counter + 1;
 				$display("\n\n[INFO] Run %0d complete.", run_counter+1);
