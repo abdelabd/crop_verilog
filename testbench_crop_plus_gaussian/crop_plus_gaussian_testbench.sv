@@ -277,7 +277,6 @@ module crop_plus_gaussian_testbench();
 		//////////////////////// 2. Wait for computation to complete ////////////////////////
 
         ap_start = 0; // start off to begin
-
 		repeat(4) begin
 
 		    // toggle ~ap_rst_n
@@ -287,10 +286,10 @@ module crop_plus_gaussian_testbench();
 		    @(posedge ap_clk) ap_start <= 1; @(posedge ap_clk) ap_start <= 0; 
 
             // Wait for done
-			wait(ap_done); 
-
-			run_counter <= run_counter + 1;
-			$display("\n\n[INFO] Run %0d complete.", run_counter+1);
+			@(posedge ap_done) begin 
+				run_counter <= run_counter + 1;
+				$display("\n\n[INFO] Run %0d complete.", run_counter+1);
+			end
 		end 
 
         //////////////////////// 3. Save output, close files ////////////////////////
