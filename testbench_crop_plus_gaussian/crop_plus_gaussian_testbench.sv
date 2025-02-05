@@ -278,16 +278,16 @@ module crop_plus_gaussian_testbench();
 
         ap_start = 0; // start off to begin
 
-		repeat(2) begin
+		repeat(4) begin
 
 		    // toggle ~ap_rst_n
-		    ap_rst_n <= 0; #(CLOCK_PERIOD); ap_rst_n <= 1; // recall, active low
+		    @(posedge ap_clk) ap_rst_n <= 0; @(posedge ap_clk) ap_rst_n <= 1; // recall, active low
 
             // Toggle start
-		    ap_start <= 1; #(CLOCK_PERIOD); ap_start <= 0; 
+		    @(posedge ap_clk) ap_start <= 1; @(posedge ap_clk) ap_start <= 0; 
 
             // Wait for done
-			wait(ap_done); //#(10*CLOCK_PERIOD); // Gives time to save
+			wait(ap_done); 
 
 			run_counter <= run_counter + 1;
 			$display("\n\n[INFO] Run %0d complete.", run_counter+1);

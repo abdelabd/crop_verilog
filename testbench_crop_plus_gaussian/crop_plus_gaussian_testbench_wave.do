@@ -8,6 +8,7 @@ add wave -noupdate /crop_plus_gaussian_testbench/ap_idle
 add wave -noupdate /crop_plus_gaussian_testbench/ap_done
 add wave -noupdate /crop_plus_gaussian_testbench/input_mem
 add wave -noupdate /crop_plus_gaussian_testbench/output_mem
+add wave -noupdate /crop_plus_gaussian_testbench/output_benchmark_mem
 add wave -noupdate /crop_plus_gaussian_testbench/crop_input_TVALID
 add wave -noupdate /crop_plus_gaussian_testbench/crop_input_TREADY
 add wave -noupdate /crop_plus_gaussian_testbench/crop_input_TDATA
@@ -27,8 +28,8 @@ add wave -noupdate /crop_plus_gaussian_testbench/cnn_output_0_TVALID
 add wave -noupdate /crop_plus_gaussian_testbench/cnn_output_0_TREADY
 add wave -noupdate /crop_plus_gaussian_testbench/cnn_output_0_TDATA
 TreeUpdate [SetDefaultTree]
-WaveRestoreCursors {{Cursor 1} {0 ps} 0}
-quietly wave cursor active 0
+WaveRestoreCursors {{Cursor 1} {1287265000 ps} 0}
+quietly wave cursor active 1
 configure wave -namecolwidth 150
 configure wave -valuecolwidth 100
 configure wave -justifyvalue left
@@ -43,4 +44,4 @@ configure wave -griddelta 40
 configure wave -timeline 0
 configure wave -timelineunits ps
 update
-WaveRestoreZoom {0 ps} {1 ns}
+WaveRestoreZoom {636898838 ps} {2610410588 ps}
