@@ -11,8 +11,8 @@ module crop_plus_gaussian_testbench();
     localparam IN_COLS         = 160;
     localparam OUT_ROWS        = 48;
     localparam OUT_COLS        = 48;
-    localparam Y_1             = 10;
-    localparam X_1             = 10;
+    localparam IMG_COL_BITWIDTH = 10;
+    localparam IMG_ROW_BITWIDTH = 10;
     localparam NUM_CROPS       = 1; 
 
 	//////////////////////// DUT signals ////////////////////////
@@ -24,10 +24,18 @@ module crop_plus_gaussian_testbench();
 	wire ap_ready; //output
 
 	// Image data input to the HLS module
-	logic [FP_TOTAL-1:0] crop_input_TDATA; //input
-	logic crop_input_TVALID; //input: data valid to be sent
-    wire crop_input_TREADY; //output: myproject ready to receive data
+	logic [FP_TOTAL-1:0] img_input_TDATA; //input
+	logic img_input_TVALID; //input: data valid to be sent
+    wire img_input_TREADY; //output: myproject ready to receive data
 		  
+	// Crop coordinates
+	reg  [9:0]                  crop_Y1_TDATA;
+    reg                         crop_Y1_TVALID;
+    reg                         crop_Y1_TREADY;
+    reg  [9:0]                  crop_X1_TDATA;
+    reg                         crop_X1_TVALID;
+    reg                         crop_X1_TREADY;
+
 	// output[0]
 	wire [FP_TOTAL-1:0] cnn_output_0_TDATA; //output
 	wire cnn_output_0_TVALID; // output: myproject output valid to be sent
@@ -60,11 +68,13 @@ module crop_plus_gaussian_testbench();
         .IN_COLS(IN_COLS),
         .OUT_ROWS(OUT_ROWS),
         .OUT_COLS(OUT_COLS),
-        .Y_1(Y_1),
-        .X_1(X_1)
+        .IMG_COL_BITWIDTH(IMG_COL_BITWIDTH),
+        .IMG_ROW_BITWIDTH(IMG_ROW_BITWIDTH)
     )
     dut (
-		  .crop_input_TDATA(crop_input_TDATA),
+		  .img_input_TDATA(img_input_TDATA),
+		  .crop_Y1_TDATA(crop_Y1_TDATA),
+		  .crop_X1_TDATA(crop_X1_TDATA),
           .cnn_output_0_TDATA(cnn_output_0_TDATA),
 		  .cnn_output_1_TDATA(cnn_output_1_TDATA),
 		  .cnn_output_2_TDATA(cnn_output_2_TDATA),
@@ -72,8 +82,14 @@ module crop_plus_gaussian_testbench();
 		  .cnn_output_4_TDATA(cnn_output_4_TDATA),
         .ap_clk(ap_clk),
         .ap_rst_n(ap_rst_n),
-        .crop_input_TVALID(crop_input_TVALID),
-        .crop_input_TREADY(crop_input_TREADY),
+        .img_input_TVALID(img_input_TVALID),
+        .img_input_TREADY(img_input_TREADY),
+
+		.crop_Y1_TVALID(crop_Y1_TVALID),
+		.crop_Y1_TREADY(crop_Y1_TREADY),
+
+		.crop_X1_TVALID(crop_X1_TVALID),
+		.crop_X1_TREADY(crop_X1_TREADY),
 		  
         .cnn_output_0_TVALID(cnn_output_0_TVALID),
         .cnn_output_0_TREADY(cnn_output_0_TREADY),
@@ -123,16 +139,16 @@ module crop_plus_gaussian_testbench();
 
 	always_ff @(posedge ap_clk) begin
         if (cc_counter < 2*OUT_ROWS*OUT_COLS) begin
-            crop_input_TVALID <= 1'b0;
+            img_input_TVALID <= 1'b0;
         end
         else if (cc_counter < 4*OUT_ROWS*OUT_COLS) begin
-            crop_input_TVALID <= 1'b1;
+            img_input_TVALID <= 1'b1;
         end
         else if (cc_counter < 6*OUT_ROWS*OUT_COLS) begin
-            crop_input_TVALID <= 1'b0;
+            img_input_TVALID <= 1'b0;
         end
         else begin
-            crop_input_TVALID <= $urandom%2;
+            img_input_TVALID <= $urandom%2;
         end
 	end
 
@@ -215,9 +231,9 @@ module crop_plus_gaussian_testbench();
 		if (~ap_rst_n) begin
 			img_idx <= 0;
 		end	
-		else if (crop_input_TVALID & crop_input_TREADY) begin
+		else if (img_input_TVALID & img_input_TREADY) begin
 			img_idx <= img_idx + 1;
-			crop_input_TDATA <= input_mem[img_idx];
+			img_input_TDATA <= input_mem[img_idx];
 		end	
 	end
 	
@@ -260,6 +276,9 @@ module crop_plus_gaussian_testbench();
 	integer run_counter = 0;
 	initial begin
 
+		crop_Y1_TDATA <= 'd10;
+        crop_X1_TDATA <= 'd10;
+
 		$display("\ninput_file_location = %0d", input_file_location);
 		$display("output_benchmark_file_location = %0d", output_benchmark_file_location);
 		$display("input_read_file_location = %0d", input_read_file_location);
@@ -286,6 +305,8 @@ module crop_plus_gaussian_testbench();
             // Toggle start
 		    ap_start <= 1; #(CLOCK_PERIOD); ap_start <= 0; 
 
+			crop_Y1_TVALID <= 1'b1; crop_X1_TVALID <= 1'b1; #(CLOCK_PERIOD*2); crop_Y1_TVALID <= 1'b0; crop_X1_TVALID <= 1'b0;
+			
             // Wait for done
 			wait(ap_done); //#(10*CLOCK_PERIOD); // Gives time to save
 

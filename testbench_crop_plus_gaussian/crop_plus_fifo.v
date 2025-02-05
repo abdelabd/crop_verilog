@@ -4,22 +4,34 @@ module crop_plus_fifo #(
     parameter IN_COLS = 40,
     parameter OUT_ROWS = 20,
     parameter OUT_COLS = 20,
-    parameter Y_1 = 10,
-    parameter X_1 = 10)
-    (clk, reset, pixel_in, pixel_out, in_ready, in_valid, out_ready, out_valid);
+    parameter IMG_COL_BITWIDTH = 10,
+    parameter IMG_ROW_BITWIDTH = 10
+    )(clk, reset, 
+    pixel_in_TDATA, pixel_in_TVALID, pixel_in_TREADY, 
+    pixel_out_TDATA, pixel_out_TVALID, pixel_out_TREADY,
+    crop_Y1_TDATA, crop_Y1_TVALID, crop_Y1_TREADY,
+    crop_X1_TDATA, crop_X1_TVALID, crop_X1_TREADY
+    );
 
     //////////////////////// I/0 ////////////////////////
     input wire clk, reset;
-    input wire [PIXEL_BIT_WIDTH-1:0] pixel_in;
-    output wire [PIXEL_BIT_WIDTH-1:0] pixel_out;
-    output wire in_ready;
-    input wire in_valid;
-    input wire out_ready;
-    output wire out_valid;
+    input wire [PIXEL_BIT_WIDTH-1:0] pixel_in_TDATA;
+    input wire pixel_in_TVALID;
+    output wire pixel_in_TREADY; 
+    output wire [PIXEL_BIT_WIDTH-1:0] pixel_out_TDATA;
+    output wire pixel_out_TVALID;
+    input wire pixel_out_TREADY;
+    input wire [IMG_ROW_BITWIDTH-1:0] crop_Y1_TDATA;
+    input wire crop_Y1_TVALID;
+    output wire crop_Y1_TREADY;
+    input wire [IMG_COL_BITWIDTH-1:0] crop_X1_TDATA;
+    input wire crop_X1_TVALID;
+    output wire crop_X1_TREADY;
+
 
     //////////////////////// Internal signals: crop_filter <--> FIFO handshake and data transmission ////////////////////////
-    wire intermediate_out_valid, intermediate_in_ready;
-    wire [PIXEL_BIT_WIDTH-1:0] intermediate_pixel_out;
+    wire intermediate_pixel_out_TVALID, intermediate_pixel_in_TREADY;
+    wire [PIXEL_BIT_WIDTH-1:0] intermediate_pixel_out_TDATA;
 
     //////////////////////// Submodules ////////////////////////
     crop_filter #(
@@ -28,17 +40,24 @@ module crop_plus_fifo #(
         .IN_COLS(IN_COLS),
         .OUT_ROWS(OUT_ROWS),
         .OUT_COLS(OUT_COLS),
-        .Y_1(Y_1),
-        .X_1(X_1))
+        .IMG_ROW_BITWIDTH(IMG_ROW_BITWIDTH),
+        .IMG_COL_BITWIDTH(IMG_COL_BITWIDTH))
         crop_filter_inst(
             .clk(clk),
             .reset(reset),
-            .pixel_in(pixel_in),
-            .pixel_out(intermediate_pixel_out),
-            .in_ready(in_ready),
-            .in_valid(in_valid),
-            .out_ready(intermediate_in_ready),
-            .out_valid(intermediate_out_valid));
+            .pixel_in_TDATA(pixel_in_TDATA),
+            .pixel_in_TVALID(pixel_in_TVALID),
+            .pixel_in_TREADY(pixel_in_TREADY),
+            .pixel_out_TDATA(intermediate_pixel_out_TDATA),
+            .pixel_out_TREADY(intermediate_pixel_in_TREADY),
+            .pixel_out_TVALID(intermediate_pixel_out_TVALID),
+            .crop_Y1_TDATA (crop_Y1_TDATA),
+            .crop_Y1_TVALID (crop_Y1_TVALID),
+            .crop_Y1_TREADY (crop_Y1_TREADY),
+            .crop_X1_TDATA (crop_X1_TDATA),
+            .crop_X1_TVALID (crop_X1_TVALID),
+            .crop_X1_TREADY (crop_X1_TREADY)
+            );
 
     fifo_sync #(
         .DATA_WIDTH(PIXEL_BIT_WIDTH),
@@ -46,11 +65,11 @@ module crop_plus_fifo #(
         fifo_sync_inst(
             .clk(clk),
             .reset(reset),
-            .in_data(intermediate_pixel_out),
-            .in_valid(intermediate_out_valid),
-            .in_ready(intermediate_in_ready),
-            .out_data(pixel_out),
-            .out_valid(out_valid),
-            .out_ready(out_ready));
+            .in_data(intermediate_pixel_out_TDATA),
+            .in_valid(intermediate_pixel_out_TVALID),
+            .in_ready(intermediate_pixel_in_TREADY),
+            .out_data(pixel_out_TDATA),
+            .out_valid(pixel_out_TVALID),
+            .out_ready(pixel_out_TREADY));
 
 endmodule

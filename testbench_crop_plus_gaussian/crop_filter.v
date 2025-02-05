@@ -17,10 +17,10 @@ module crop_filter #(
 
     //////////////////////// I/0 ////////////////////////
     input wire clk, reset;
-    input wire [PIXEL_BIT_WIDTH-1:0] pixel_in_TDATA; 
-    output reg [PIXEL_BIT_WIDTH-1:0] pixel_out_TDATA;
+    input wire [PIXEL_BIT_WIDTH-1:0] pixel_in_TDATA;
     input wire pixel_in_TVALID;
-    output reg pixel_in_TREADY; 
+    output reg pixel_in_TREADY;  
+    output reg [PIXEL_BIT_WIDTH-1:0] pixel_out_TDATA;
     output reg pixel_out_TVALID;
     input wire pixel_out_TREADY;
     input wire [IMG_ROW_BITWIDTH-1:0] crop_Y1_TDATA;
