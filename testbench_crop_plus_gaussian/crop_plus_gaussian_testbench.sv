@@ -132,20 +132,18 @@ module crop_plus_gaussian_testbench();
 
     //////////////////////// Randomize handshake signals ////////////////////////
 
-    // 1. valid-ready = 00
-    // 2. valid-ready = 10
-    // 3. valid-ready = 01
-    // 4. valid-ready = 11 (both random)
+    // {crop_Y1_TVALID, crop_X1_TVALID, img_input_TREADY, cnn_output_TREADY}
 
 	// img_input_TVALID
 	always_ff @(posedge ap_clk) begin
-        if (cc_counter < 2*OUT_ROWS*OUT_COLS) begin
+        if (cc_counter < 1.5*OUT_ROWS*OUT_COLS) begin
             img_input_TVALID <= 1'b0;
+			// img_input_TVALID <= 1'b1;
         end
-        else if (cc_counter < 4*OUT_ROWS*OUT_COLS) begin
+        else if (cc_counter < 3*OUT_ROWS*OUT_COLS) begin
             img_input_TVALID <= 1'b1;
         end
-        else if (cc_counter < 6*OUT_ROWS*OUT_COLS) begin
+        else if (cc_counter < 4.5*OUT_ROWS*OUT_COLS) begin
             img_input_TVALID <= 1'b0;
         end
         else begin
@@ -154,34 +152,40 @@ module crop_plus_gaussian_testbench();
 	end
 
 	// crop_Y1_TVALID and crop_X1_TVALID
+	// always_ff @(posedge ap_clk) begin
+	// 	// if (cc_counter==OUT_ROWS*OUT_COLS/2) begin
+	// 	if (cc_counter>OUT_ROWS*OUT_COLS/2) begin
+	// 		crop_Y1_TVALID <= 1'b1;
+	// 		crop_X1_TVALID <= 1'b1;
+	// 	end
+	// 	else begin
+	// 		crop_Y1_TVALID <= 1'b0;
+	// 		crop_X1_TVALID <= 1'b0;
+	// 	end
+	// end
+
 	always_ff @(posedge ap_clk) begin
-		if (cc_counter==0) begin
-			crop_Y1_TVALID <= 1'b1;
-			crop_X1_TVALID <= 1'b1;
-		end
-		else begin
-			crop_Y1_TVALID <= 1'b0;
-			crop_X1_TVALID <= 1'b0;
-		end
+		crop_Y1_TVALID <= $urandom%2;
+		crop_X1_TVALID <= $urandom%2;
 	end
 
 	// cnn_output_TREADY
 	always_ff @(posedge ap_clk) begin
-        if (cc_counter < 2*OUT_ROWS*OUT_COLS) begin
+        if (cc_counter < 1.5*OUT_ROWS*OUT_COLS) begin
             cnn_output_0_TREADY <= 1'b0;
 			cnn_output_1_TREADY <= 1'b0;
 			cnn_output_2_TREADY <= 1'b0;
 			cnn_output_3_TREADY <= 1'b0;
 			cnn_output_4_TREADY <= 1'b0;
         end
-        else if (cc_counter < 4*OUT_ROWS*OUT_COLS) begin
+        else if (cc_counter < 3*OUT_ROWS*OUT_COLS) begin
             cnn_output_0_TREADY <= 1'b0;
 			cnn_output_1_TREADY <= 1'b0;
 			cnn_output_2_TREADY <= 1'b0;
 			cnn_output_3_TREADY <= 1'b0;
 			cnn_output_4_TREADY <= 1'b0;
         end
-        else if (cc_counter < 6*OUT_ROWS*OUT_COLS) begin
+        else if (cc_counter < 4.5*OUT_ROWS*OUT_COLS) begin
             cnn_output_0_TREADY <= 1'b1;
 			cnn_output_1_TREADY <= 1'b1;
 			cnn_output_2_TREADY <= 1'b1;
