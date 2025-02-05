@@ -14,16 +14,24 @@ module crop_filter_testbench();
     localparam Y_1             = 10;
     localparam X_1             = 10;
     localparam NUM_CROPS       = 1; 
+    localparam IMG_COL_BITWIDTH = 10;
+    localparam IMG_ROW_BITWIDTH = 10;
 
     //////////////////////// DUT signals ////////////////////////
     reg                         clk;
     reg                         reset;
-    reg  [FP_TOTAL-1:0] pixel_in;
-    wire [FP_TOTAL-1:0] pixel_out;
-    wire                        in_ready;
-    reg                         in_valid;
-    reg                         out_ready;
-    wire                        out_valid;
+    reg  [FP_TOTAL-1:0]         pixel_in_TDATA;
+    reg                         pixel_in_TVALID;
+    wire                        pixel_in_TREADY;
+    wire [FP_TOTAL-1:0]         pixel_out_TDATA;
+    wire                        pixel_out_TVALID;
+    reg                         pixel_out_TREADY;
+    reg  [9:0]                  crop_Y1_TDATA;
+    reg                         crop_Y1_TVALID;
+    reg                         crop_Y1_TREADY;
+    reg  [9:0]                  crop_X1_TDATA;
+    reg                         crop_X1_TVALID;
+    reg                         crop_X1_TREADY;
     
     //////////////////////// DUT module ////////////////////////
     crop_filter #(
@@ -32,17 +40,23 @@ module crop_filter_testbench();
         .IN_COLS(IN_COLS),
         .OUT_ROWS(OUT_ROWS),
         .OUT_COLS(OUT_COLS),
-        .Y_1(Y_1),
-        .X_1(X_1)
+        .IMG_COL_BITWIDTH(IMG_COL_BITWIDTH),
+        .IMG_ROW_BITWIDTH(IMG_ROW_BITWIDTH)
     ) dut (
         .clk       (clk),
         .reset     (reset),
-        .pixel_in  (pixel_in),
-        .pixel_out (pixel_out),
-        .in_ready  (in_ready),
-        .in_valid  (in_valid),
-        .out_ready (out_ready),
-        .out_valid (out_valid)
+        .pixel_in_TDATA  (pixel_in_TDATA),
+        .pixel_in_TVALID  (pixel_in_TVALID),
+        .pixel_in_TREADY  (pixel_in_TREADY),
+        .pixel_out_TDATA (pixel_out_TDATA),
+        .pixel_out_TVALID (pixel_out_TVALID),
+        .pixel_out_TREADY (pixel_out_TREADY), 
+        .crop_Y1_TDATA (crop_Y1_TDATA),
+        .crop_Y1_TVALID (crop_Y1_TVALID),
+        .crop_Y1_TREADY (crop_Y1_TREADY),
+        .crop_X1_TDATA (crop_X1_TDATA),
+        .crop_X1_TVALID (crop_X1_TVALID),
+        .crop_X1_TREADY (crop_X1_TREADY)
     );
 
     //////////////////////// Generate clock ////////////////////////
@@ -57,12 +71,12 @@ module crop_filter_testbench();
 
     // input-valid
 	always_ff @(posedge clk) begin
-		in_valid <= $urandom%2;
+		pixel_in_TVALID <= $urandom%2;
 	end
 
 	// output-ready
 	always_ff @(posedge clk) begin
-		out_ready <= $urandom%2;
+		pixel_out_TREADY <= $urandom%2;
 	end
 
     //////////////////////// I/O data ////////////////////////
@@ -114,10 +128,10 @@ module crop_filter_testbench();
 			idx_in <= 0;
             finished <= 1'b0;
 		end	
-		else if (in_ready & in_valid) begin
+		else if (pixel_in_TREADY & pixel_in_TVALID) begin
             last_idx_in <= idx_in;
 			idx_in <= idx_in + 1;
-			pixel_in <= input_mem[idx_in]; // give data to module
+			pixel_in_TDATA <= input_mem[idx_in]; // give data to module
 
             if (idx_in == IN_ROWS*IN_COLS-1) begin
                 finished <= 1'b1;
@@ -135,14 +149,14 @@ module crop_filter_testbench();
 			idx_out <= 0;
             output_mem <= output_mem_refresh;
 		end	
-		else if (out_ready & out_valid) begin
+		else if (pixel_out_TREADY & pixel_out_TVALID) begin
             last_idx_out <= idx_out;
 			idx_out <= idx_out + 1;
-            output_mem[idx_out] <= pixel_out; // get data from module
+            output_mem[idx_out] <= pixel_out_TDATA; // get data from module
 
             // Asserts
-            assert(pixel_out == pixel_in); // confirm output is same as input
-            assert((pixel_out != output_mem[idx_out-1])|(idx_out==0)); // output should be changing for systematic value-equals-index data
+            assert(pixel_out_TDATA == pixel_in_TDATA); // confirm output is same as input
+            assert((pixel_out_TDATA != output_mem[idx_out-1])|(idx_out==0)); // output should be changing for systematic value-equals-index data
             assert((idx_out != last_idx_out)|(idx_out==0)); // exception for first cycle because of indexing
             assert((output_mem[last_idx_out] == output_benchmark_mem[last_idx_out])|(idx_out==0)); // check if output is same as benchmark, exception on first cycle because of indexing
 		end	
@@ -150,6 +164,9 @@ module crop_filter_testbench();
 
     integer run_counter = 0;
     initial begin
+
+        crop_Y1_TDATA <= 'd10;
+        crop_X1_TDATA <= 'd10;
 
         $display("\ninput_file_location = %0d", input_file_location);
 		$display("output_benchmark_file_location = %0d", output_benchmark_file_location);
@@ -169,6 +186,7 @@ module crop_filter_testbench();
         // Toggle reset
         repeat(100) begin
             reset <= 1'b1;  #(CLOCK_PERIOD*2); reset <= 1'b0; 
+            crop_Y1_TVALID <= 1'b1; crop_X1_TVALID <= 1'b1; #(CLOCK_PERIOD*2); crop_Y1_TVALID <= 1'b0; crop_X1_TVALID <= 1'b0;
             wait(finished);
             run_counter <= run_counter + 1;
         end
