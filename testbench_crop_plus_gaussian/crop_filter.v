@@ -1,3 +1,4 @@
+
 module crop_filter #(
     parameter PIXEL_BIT_WIDTH = 12,
     parameter IN_ROWS = 40,
@@ -32,7 +33,6 @@ module crop_filter #(
         if (reset) begin // Reset all the counters to 0 
             x <= 0;
             y <= 0;
-            pass_filter <= 1'b0;
         end 
         else if (idx_incr) begin
             if (x == IN_COLS-1) begin
