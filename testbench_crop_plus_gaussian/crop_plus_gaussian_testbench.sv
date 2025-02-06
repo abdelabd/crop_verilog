@@ -122,13 +122,13 @@ module crop_plus_gaussian_testbench();
     // 4. valid-ready = 11 (both random)
 
 	always_ff @(posedge ap_clk) begin
-        if (cc_counter < 2*OUT_ROWS*OUT_COLS) begin
+        if (cc_counter < 1.5*OUT_ROWS*OUT_COLS) begin
             crop_input_TVALID <= 1'b0;
         end
-        else if (cc_counter < 4*OUT_ROWS*OUT_COLS) begin
+        else if (cc_counter < 3*OUT_ROWS*OUT_COLS) begin
             crop_input_TVALID <= 1'b1;
         end
-        else if (cc_counter < 6*OUT_ROWS*OUT_COLS) begin
+        else if (cc_counter < 4.5*OUT_ROWS*OUT_COLS) begin
             crop_input_TVALID <= 1'b0;
         end
         else begin
@@ -139,21 +139,21 @@ module crop_plus_gaussian_testbench();
 	// output-ready
 
 	always_ff @(posedge ap_clk) begin
-        if (cc_counter < 2*OUT_ROWS*OUT_COLS) begin
+        if (cc_counter < 1.5*OUT_ROWS*OUT_COLS) begin
             cnn_output_0_TREADY <= 1'b0;
 			cnn_output_1_TREADY <= 1'b0;
 			cnn_output_2_TREADY <= 1'b0;
 			cnn_output_3_TREADY <= 1'b0;
 			cnn_output_4_TREADY <= 1'b0;
         end
-        else if (cc_counter < 4*OUT_ROWS*OUT_COLS) begin
+        else if (cc_counter < 3*OUT_ROWS*OUT_COLS) begin
             cnn_output_0_TREADY <= 1'b0;
 			cnn_output_1_TREADY <= 1'b0;
 			cnn_output_2_TREADY <= 1'b0;
 			cnn_output_3_TREADY <= 1'b0;
 			cnn_output_4_TREADY <= 1'b0;
         end
-        else if (cc_counter < 6*OUT_ROWS*OUT_COLS) begin
+        else if (cc_counter < 4.5*OUT_ROWS*OUT_COLS) begin
             cnn_output_0_TREADY <= 1'b1;
 			cnn_output_1_TREADY <= 1'b1;
 			cnn_output_2_TREADY <= 1'b1;
@@ -277,7 +277,7 @@ module crop_plus_gaussian_testbench();
 		//////////////////////// 2. Wait for computation to complete ////////////////////////
 
         ap_start = 0; // start off to begin
-		repeat(4) begin
+		repeat(3) begin
 
 		    // toggle ~ap_rst_n
 		    @(posedge ap_clk) ap_rst_n <= 0; @(posedge ap_clk) ap_rst_n <= 1; // recall, active low

@@ -7,7 +7,7 @@ vlib work
 vlog "./crop_plus_fifo_testbench.sv"
 vlog "./crop_plus_fifo.v"
 vlog "./crop_filter.v"
-vlog "./fwft_fifo.v"
+vlog "./fifo_sync.v"
 
 # Call vsim to invoke simulator
 #     Make sure the last item on the line is the name of the

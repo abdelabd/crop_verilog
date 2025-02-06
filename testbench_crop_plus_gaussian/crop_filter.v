@@ -7,16 +7,19 @@ module crop_filter #(
     parameter OUT_COLS = 20,
     parameter Y_1 = 10,
     parameter X_1 = 10)
-	(clk, reset, pixel_in, pixel_out, in_ready, in_valid, out_ready, out_valid);
+	(clk, reset, 
+    pixel_in_TDATA, pixel_in_TVALID, pixel_in_TREADY,
+    pixel_out_TDATA, pixel_out_TVALID, pixel_out_TREADY);
 
     //////////////////////// I/0 ////////////////////////
     input wire clk, reset;
-    input wire [PIXEL_BIT_WIDTH-1:0] pixel_in; 
-    output reg [PIXEL_BIT_WIDTH-1:0] pixel_out;
-    output reg in_ready; 
-    input wire in_valid;
-    input wire out_ready;
-    output reg out_valid;
+    input wire [PIXEL_BIT_WIDTH-1:0] pixel_in_TDATA; 
+    input wire pixel_in_TVALID;
+    output reg pixel_in_TREADY; 
+    output reg [PIXEL_BIT_WIDTH-1:0] pixel_out_TDATA;
+    output reg pixel_out_TVALID;
+    input wire pixel_out_TREADY;
+    
 
     //////////////////////// Internal signals ////////////////////////
     localparam IMG_COL_BITHWIDTH = $clog2(IN_COLS)+1;
@@ -48,19 +51,19 @@ module crop_filter #(
         end
     end
 
-    //////////////////////// Combinational logic: pre_DFF_pixel_out, in_ready, pre_DFF_out_valid, pass_filter, idx_incr ////////////////////////
+    //////////////////////// Combinational logic: pre_DFF_pixel_out, pixel_in_TREADY, pre_DFF_pixel_out_TVALID, pass_filter, idx_incr ////////////////////////
     always @(*) begin   
-        pixel_out = pixel_in;
-        in_ready = out_ready; // Only accept new data if we can pass on existing data
+        pixel_out_TDATA = pixel_in_TDATA;
+        pixel_in_TREADY = pixel_out_TREADY; // Only accept new data if we can pass on existing data
 
         // pass_filter logic
         if((y >= Y_1) && (y < Y_1+OUT_ROWS) && (x > X_1) && (x <= X_1+OUT_COLS)) pass_filter = 1'b1; // 1 inside crop-region
         else pass_filter = 1'b0; // 0 otherwise
 
-        // pre_DFF_out_valid = in_valid & pass_filter; // Only pass on data if it's new and it passes the filter
-        out_valid = in_valid & pass_filter;
+        // pre_DFF_pixel_out_TVALID = pixel_in_TVALID & pass_filter; // Only pass on data if it's new and it passes the filter
+        pixel_out_TVALID = pixel_in_TVALID & pass_filter;
 
-        idx_incr = in_valid & in_ready; // Increment the counters i.f.f. we receive new data 
+        idx_incr = pixel_in_TVALID & pixel_in_TREADY; // Increment the counters i.f.f. we receive new data 
     end
 
 endmodule

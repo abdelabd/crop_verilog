@@ -77,12 +77,12 @@ module crop_plus_gaussian #( // Has all the same inputs and outputs as myproject
     ) crop_plus_fifo_inst (
         .clk       (ap_clk),
         .reset     (~ap_rst_n),
-        .pixel_in  (crop_input_TDATA),
-        .pixel_out (crop_output_TDATA),
-        .in_ready  (crop_input_TREADY),
-        .in_valid  (crop_input_TVALID),
-        .out_ready (cnn_input_TREADY),
-        .out_valid (crop_output_TVALID)
+        .pixel_in_TDATA  (crop_input_TDATA),
+        .pixel_in_TVALID  (crop_input_TVALID),
+        .pixel_in_TREADY  (crop_input_TREADY),
+        .pixel_out_TDATA (crop_output_TDATA),
+        .pixel_out_TVALID (crop_output_TVALID),
+        .pixel_out_TREADY (cnn_input_TREADY)
     );
 
     // Then the hls4ml model

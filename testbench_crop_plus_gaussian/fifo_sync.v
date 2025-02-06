@@ -2,16 +2,16 @@
 module fifo_sync #(
     parameter DATA_WIDTH = 12,
     parameter FIFO_DEPTH = 20*20)
-    (clk, reset, in_data, in_valid, in_ready, out_data, out_valid, out_ready);
+    (clk, reset, in_TDATA, in_TVALID, in_TREADY, out_TDATA, out_TVALID, out_TREADY);
     
     //////////////////////// I/0 ////////////////////////
     input wire clk, reset;
-    input wire [DATA_WIDTH-1:0] in_data;
-    input wire in_valid;
-    output reg in_ready;
-    output reg [DATA_WIDTH-1:0] out_data;
-    output reg out_valid;
-    input wire out_ready;
+    input wire [DATA_WIDTH-1:0] in_TDATA;
+    input wire in_TVALID;
+    output reg in_TREADY;
+    output reg [DATA_WIDTH-1:0] out_TDATA;
+    output reg out_TVALID;
+    input wire out_TREADY;
 
 
     //////////////////////// Internal signals ////////////////////////
@@ -25,8 +25,8 @@ module fifo_sync #(
     always @(posedge clk) begin
         if (reset) begin
             w_ptr <= 0;
-        end else if (in_valid && in_ready) begin // Write if new data and we have space
-            fifo_mem[w_ptr] <= in_data;
+        end else if (in_TVALID && in_TREADY) begin // Write if new data and we have space
+            fifo_mem[w_ptr] <= in_TDATA;
             if (w_ptr == FIFO_DEPTH - 1) w_ptr <= 0;
             else w_ptr <= w_ptr + 1;
         end
@@ -37,10 +37,10 @@ module fifo_sync #(
     always @(posedge clk) begin
         if (reset) begin
             r_ptr    <= 0;
-            out_data <= {DATA_WIDTH{1'b0}};
+            out_TDATA <= {DATA_WIDTH{1'b0}};
         end else begin
-            if (out_valid && out_ready) begin // Read if downstream is ready and we have unread data
-                out_data <= fifo_mem[r_ptr];
+            if (out_TVALID && out_TREADY) begin // Read if downstream is ready and we have unread data
+                out_TDATA <= fifo_mem[r_ptr];
                 if (r_ptr == FIFO_DEPTH - 1) r_ptr <= 0;
                 else r_ptr <= r_ptr + 1;
             end 
@@ -52,9 +52,9 @@ module fifo_sync #(
         if (reset) begin
             count <= 0;
         end else begin
-            if (in_valid && in_ready && !(out_valid && out_ready)) begin
+            if (in_TVALID && in_TREADY && !(out_TVALID && out_TREADY)) begin
                 count <= count + 1; // Increment if we only write new data
-            end else if (!(in_valid && in_ready) && (out_valid && out_ready)) begin
+            end else if (!(in_TVALID && in_TREADY) && (out_TVALID && out_TREADY)) begin
                 count <= count - 1; // Decrement if we only read new data
             end 
             // else constant
@@ -63,8 +63,8 @@ module fifo_sync #(
 
     //////////////////////// Combinational logic: handshake signals ////////////////////////
     always @(*) begin
-        in_ready  = (count < FIFO_DEPTH); // in_ready=1 if not full
-        out_valid = (count > 0); // out_valid=1 if not empty
+        in_TREADY  = (count < FIFO_DEPTH); // in_TREADY=1 if not full
+        out_TVALID = (count > 0); // out_valid=1 if not empty
     end
     
 endmodule

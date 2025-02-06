@@ -8,17 +8,16 @@ add wave -noupdate /crop_plus_fifo_testbench/idx_out
 add wave -noupdate /crop_plus_fifo_testbench/last_idx_out
 add wave -noupdate /crop_plus_fifo_testbench/output_mem
 add wave -noupdate /crop_plus_fifo_testbench/output_benchmark_mem
-add wave -noupdate /crop_plus_fifo_testbench/pixel_in
-add wave -noupdate /crop_plus_fifo_testbench/pixel_out
-add wave -noupdate /crop_plus_fifo_testbench/out_valid
-add wave -noupdate /crop_plus_fifo_testbench/out_ready
-add wave -noupdate /crop_plus_fifo_testbench/in_valid
-add wave -noupdate /crop_plus_fifo_testbench/in_ready
-add wave -noupdate -label dut::fifo::in_valid /crop_plus_fifo_testbench/dut/fifo_sync_inst/in_valid
 add wave -noupdate -label dut::fifo::count /crop_plus_fifo_testbench/dut/fifo_sync_inst/count
 add wave -noupdate -label dut::crop_filter::pass_filter /crop_plus_fifo_testbench/dut/crop_filter_inst/pass_filter
 add wave -noupdate /crop_plus_fifo_testbench/run_counter
 add wave -noupdate /crop_plus_fifo_testbench/cc_counter
+add wave -noupdate /crop_plus_fifo_testbench/pixel_out_TVALID
+add wave -noupdate /crop_plus_fifo_testbench/pixel_out_TREADY
+add wave -noupdate /crop_plus_fifo_testbench/pixel_out_TDATA
+add wave -noupdate /crop_plus_fifo_testbench/pixel_in_TVALID
+add wave -noupdate /crop_plus_fifo_testbench/pixel_in_TREADY
+add wave -noupdate /crop_plus_fifo_testbench/pixel_in_TDATA
 TreeUpdate [SetDefaultTree]
 WaveRestoreCursors {{Cursor 1} {1228055000 ps} 0}
 quietly wave cursor active 1
@@ -36,4 +35,4 @@ configure wave -griddelta 40
 configure wave -timeline 0
 configure wave -timelineunits ps
 update
-WaveRestoreZoom {0 ps} {2969961750 ps}
+WaveRestoreZoom {2656831338 ps} {5626793088 ps}
