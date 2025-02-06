@@ -11,19 +11,26 @@ module crop_filter_testbench();
     localparam IN_COLS         = 160;
     localparam OUT_ROWS        = 48;
     localparam OUT_COLS        = 48;
-    localparam Y_1             = 10;
-    localparam X_1             = 10;
+    localparam IMG_ROW_BITWIDTH = 10;
+    localparam IMG_COL_BITWIDTH = 10;
     localparam NUM_CROPS       = 1; 
 
     //////////////////////// DUT signals ////////////////////////
     reg                         clk;
     reg                         reset;
     reg  [FP_TOTAL-1:0]         pixel_in_TDATA;
-    wire [FP_TOTAL-1:0]         pixel_out_TDATA;
-    wire                        pixel_in_TREADY;
     reg                         pixel_in_TVALID;
-    reg                         pixel_out_TREADY;
+    wire                        pixel_in_TREADY;
+    reg  [IMG_ROW_BITWIDTH-1:0] crop_Y1_TDATA;
+    reg                         crop_Y1_TVALID;
+    wire                        crop_Y1_TREADY;
+    reg  [IMG_ROW_BITWIDTH-1:0] crop_X1_TDATA;
+    reg                         crop_X1_TVALID;
+    wire                        crop_X1_TREADY;
+    wire [FP_TOTAL-1:0]         pixel_out_TDATA;
     wire                        pixel_out_TVALID;
+    reg                         pixel_out_TREADY;
+    
     
     //////////////////////// DUT module ////////////////////////
     crop_filter #(
@@ -32,17 +39,23 @@ module crop_filter_testbench();
         .IN_COLS(IN_COLS),
         .OUT_ROWS(OUT_ROWS),
         .OUT_COLS(OUT_COLS),
-        .Y_1(Y_1),
-        .X_1(X_1)
+        .IMG_ROW_BITWIDTH(IMG_ROW_BITWIDTH),
+        .IMG_COL_BITWIDTH(IMG_COL_BITWIDTH)
     ) dut (
         .clk       (clk),
         .reset     (reset),
         .pixel_in_TDATA  (pixel_in_TDATA),
-        .pixel_out_TDATA (pixel_out_TDATA),
-        .pixel_in_TREADY  (pixel_in_TREADY),
         .pixel_in_TVALID  (pixel_in_TVALID),
-        .pixel_out_TREADY (pixel_out_TREADY),
-        .pixel_out_TVALID (pixel_out_TVALID)
+        .pixel_in_TREADY  (pixel_in_TREADY),
+        .crop_Y1_TDATA  (crop_Y1_TDATA),
+        .crop_Y1_TVALID  (crop_Y1_TVALID),
+        .crop_Y1_TREADY  (crop_Y1_TREADY),
+        .crop_X1_TDATA  (crop_X1_TDATA),
+        .crop_X1_TVALID  (crop_X1_TVALID),
+        .crop_X1_TREADY  (crop_X1_TREADY),
+        .pixel_out_TDATA (pixel_out_TDATA),
+        .pixel_out_TVALID (pixel_out_TVALID),
+        .pixel_out_TREADY (pixel_out_TREADY)
     );
 
     //////////////////////// Generate clock ////////////////////////
@@ -55,12 +68,22 @@ module crop_filter_testbench();
 
     //////////////////////// Randomize handshake signals ////////////////////////
 
-    // input-valid
+    // pixel_in_TVALID
 	always_ff @(posedge clk) begin
 		pixel_in_TVALID <= $urandom%2;
 	end
 
-	// output-ready
+    // crop_Y1_TVALID
+	always_ff @(posedge clk) begin
+		crop_Y1_TVALID <= 1'b1;
+	end
+
+    // crop_X1_TVALID
+	always_ff @(posedge clk) begin
+		crop_X1_TVALID <= 1'b1;
+	end
+
+	// pixel_out_TREADY
 	always_ff @(posedge clk) begin
 		pixel_out_TREADY <= $urandom%2;
 	end
@@ -150,6 +173,9 @@ module crop_filter_testbench();
 
     integer run_counter = 0;
     initial begin
+
+        crop_Y1_TDATA <= 'd10;
+        crop_X1_TDATA <= 'd10;
 
         $display("\ninput_file_location = %0d", input_file_location);
 		$display("output_benchmark_file_location = %0d", output_benchmark_file_location);
