@@ -257,7 +257,7 @@ module crop_plus_fifo_testbench();
                 end
 
                 // 5. Save output
-                output_file_location = $sformatf("tb_data/ap_fixed_%0d_%0d/%0dx%0d_to_%0dx%0dx%0d/Y1_%0d/X1_%0d/cropfilter_out.bin",
+                output_file_location = $sformatf("tb_data/ap_fixed_%0d_%0d/%0dx%0d_to_%0dx%0dx%0d/Y1_%0d/X1_%0d/cpf_out.bin",
                         FP_TOTAL, FP_INT,
                         IN_ROWS, IN_COLS,
                         OUT_ROWS, OUT_COLS, NUM_CROPS,
