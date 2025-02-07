@@ -44,7 +44,7 @@ module crop_filter #(
             end
             if (crop_X1_TVALID && crop_X1_TREADY) begin
                 X1 <= crop_X1_TDATA;
-                crop_X1_TREADY <= 1'b1;
+                crop_X1_TREADY <= 1'b0;
             end
         end
     end
