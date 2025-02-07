@@ -4,10 +4,12 @@ module crop_plus_gaussian #( // Has all the same inputs and outputs as myproject
     parameter IN_COLS = 40,
     parameter OUT_ROWS = 20,
     parameter OUT_COLS = 20,
-    parameter Y_1 = 10,
-    parameter X_1 = 10)
+    parameter IMG_ROW_BITWIDTH = 10,
+    parameter IMG_COL_BITWIDTH = 10)
     (
         crop_input_TDATA,
+        crop_Y1_TDATA,
+        crop_X1_TDATA,
         cnn_output_0_TDATA,
         cnn_output_1_TDATA,
         cnn_output_2_TDATA,
@@ -17,6 +19,10 @@ module crop_plus_gaussian #( // Has all the same inputs and outputs as myproject
         ap_rst_n,
         crop_input_TVALID,
         crop_input_TREADY,
+        crop_Y1_TVALID,
+        crop_Y1_TREADY,
+        crop_X1_TVALID,
+        crop_X1_TREADY,
         ap_start,
         cnn_output_0_TVALID,
         cnn_output_0_TREADY,
@@ -35,6 +41,8 @@ module crop_plus_gaussian #( // Has all the same inputs and outputs as myproject
 
     // I/O
     input wire [PIXEL_BIT_WIDTH - 1:0] crop_input_TDATA;
+    input wire [IMG_ROW_BITWIDTH - 1:0] crop_Y1_TDATA;
+    input wire [IMG_COL_BITWIDTH - 1:0] crop_X1_TDATA;
     output wire [PIXEL_BIT_WIDTH - 1:0] cnn_output_0_TDATA;
     output wire [PIXEL_BIT_WIDTH - 1:0] cnn_output_1_TDATA;
     output wire [PIXEL_BIT_WIDTH - 1:0] cnn_output_2_TDATA;
@@ -44,6 +52,10 @@ module crop_plus_gaussian #( // Has all the same inputs and outputs as myproject
     input wire ap_rst_n;
     input wire crop_input_TVALID;
     output wire crop_input_TREADY;
+    input wire crop_Y1_TVALID;
+    output wire crop_Y1_TREADY;
+    input wire crop_X1_TVALID;
+    output wire crop_X1_TREADY;
     input wire ap_start;
     output wire cnn_output_0_TVALID;
     input wire cnn_output_0_TREADY;
@@ -72,14 +84,20 @@ module crop_plus_gaussian #( // Has all the same inputs and outputs as myproject
         .IN_COLS(IN_COLS),
         .OUT_ROWS(OUT_ROWS),
         .OUT_COLS(OUT_COLS),
-        .Y_1(Y_1),
-        .X_1(X_1)
+        .IMG_ROW_BITWIDTH(IMG_ROW_BITWIDTH),
+        .IMG_COL_BITWIDTH(IMG_COL_BITWIDTH)
     ) crop_plus_fifo_inst (
         .clk       (ap_clk),
         .reset     (~ap_rst_n),
         .pixel_in_TDATA  (crop_input_TDATA),
         .pixel_in_TVALID  (crop_input_TVALID),
         .pixel_in_TREADY  (crop_input_TREADY),
+        .crop_Y1_TDATA  (crop_Y1_TDATA),
+        .crop_Y1_TVALID  (crop_Y1_TVALID),
+        .crop_Y1_TREADY  (crop_Y1_TREADY),
+        .crop_X1_TDATA  (crop_X1_TDATA),
+        .crop_X1_TVALID  (crop_X1_TVALID),
+        .crop_X1_TREADY  (crop_X1_TREADY),
         .pixel_out_TDATA (crop_output_TDATA),
         .pixel_out_TVALID (crop_output_TVALID),
         .pixel_out_TREADY (cnn_input_TREADY)

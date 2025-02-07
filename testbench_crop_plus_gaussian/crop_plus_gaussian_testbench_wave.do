@@ -27,8 +27,13 @@ add wave -noupdate /crop_plus_gaussian_testbench/cnn_output_1_TDATA
 add wave -noupdate /crop_plus_gaussian_testbench/cnn_output_0_TVALID
 add wave -noupdate /crop_plus_gaussian_testbench/cnn_output_0_TREADY
 add wave -noupdate /crop_plus_gaussian_testbench/cnn_output_0_TDATA
+add wave -noupdate /crop_plus_gaussian_testbench/dut/crop_plus_fifo_inst/crop_filter_inst/pre_DFF_crop_Y1_TREADY
+add wave -noupdate /crop_plus_gaussian_testbench/dut/crop_plus_fifo_inst/crop_filter_inst/crop_Y1_TREADY
+add wave -noupdate /crop_plus_gaussian_testbench/dut/crop_plus_fifo_inst/crop_filter_inst/crop_Y1_TVALID
+add wave -noupdate /crop_plus_gaussian_testbench/dut/crop_plus_fifo_inst/crop_filter_inst/crop_Y1_TDATA
+add wave -noupdate /crop_plus_gaussian_testbench/dut/crop_plus_fifo_inst/crop_filter_inst/Y1
 TreeUpdate [SetDefaultTree]
-WaveRestoreCursors {{Cursor 1} {1287265000 ps} 0}
+WaveRestoreCursors {{Cursor 1} {37201463 ps} 0}
 quietly wave cursor active 1
 configure wave -namecolwidth 150
 configure wave -valuecolwidth 100
@@ -44,4 +49,4 @@ configure wave -griddelta 40
 configure wave -timeline 0
 configure wave -timelineunits ps
 update
-WaveRestoreZoom {636898838 ps} {2610410588 ps}
+WaveRestoreZoom {0 ps} {133460250 ps}

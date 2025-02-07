@@ -11,8 +11,8 @@ module crop_plus_gaussian_testbench();
     localparam IN_COLS         = 160;
     localparam OUT_ROWS        = 48;
     localparam OUT_COLS        = 48;
-    localparam Y_1             = 10;
-    localparam X_1             = 10;
+    localparam IMG_ROW_BITWIDTH = 10;
+    localparam IMG_COL_BITWIDTH = 10;
     localparam NUM_CROPS       = 1; 
 
 	//////////////////////// DUT signals ////////////////////////
@@ -23,11 +23,21 @@ module crop_plus_gaussian_testbench();
 	wire ap_idle; //output
 	wire ap_ready; //output
 
-	// Image data input to the HLS module
+	// Image data input 
 	logic [FP_TOTAL-1:0] crop_input_TDATA; //input
 	logic crop_input_TVALID; //input: data valid to be sent
     wire crop_input_TREADY; //output: myproject ready to receive data
-		  
+
+	// crop_Y1 data
+	logic [IMG_ROW_BITWIDTH-1:0] crop_Y1_TDATA; //input
+	logic crop_Y1_TVALID; //input: data valid to be sent
+	wire crop_Y1_TREADY; //output: myproject ready to receive data
+
+	// crop_X1 data
+	logic [IMG_COL_BITWIDTH-1:0] crop_X1_TDATA; //input
+	logic crop_X1_TVALID; //input: data valid to be sent
+	wire crop_X1_TREADY; //output: myproject ready to receive data
+
 	// output[0]
 	wire [FP_TOTAL-1:0] cnn_output_0_TDATA; //output
 	wire cnn_output_0_TVALID; // output: myproject output valid to be sent
@@ -60,11 +70,13 @@ module crop_plus_gaussian_testbench();
         .IN_COLS(IN_COLS),
         .OUT_ROWS(OUT_ROWS),
         .OUT_COLS(OUT_COLS),
-        .Y_1(Y_1),
-        .X_1(X_1)
+        .IMG_ROW_BITWIDTH(IMG_ROW_BITWIDTH),
+        .IMG_COL_BITWIDTH(IMG_COL_BITWIDTH)
     )
     dut (
 		  .crop_input_TDATA(crop_input_TDATA),
+		  .crop_Y1_TDATA(crop_Y1_TDATA),
+		  .crop_X1_TDATA(crop_X1_TDATA),
           .cnn_output_0_TDATA(cnn_output_0_TDATA),
 		  .cnn_output_1_TDATA(cnn_output_1_TDATA),
 		  .cnn_output_2_TDATA(cnn_output_2_TDATA),
@@ -74,6 +86,12 @@ module crop_plus_gaussian_testbench();
         .ap_rst_n(ap_rst_n),
         .crop_input_TVALID(crop_input_TVALID),
         .crop_input_TREADY(crop_input_TREADY),
+
+		.crop_Y1_TVALID(crop_Y1_TVALID),
+		.crop_Y1_TREADY(crop_Y1_TREADY),
+
+		.crop_X1_TVALID(crop_X1_TVALID),
+		.crop_X1_TREADY(crop_X1_TREADY),
 		  
         .cnn_output_0_TVALID(cnn_output_0_TVALID),
         .cnn_output_0_TREADY(cnn_output_0_TREADY),
@@ -121,6 +139,7 @@ module crop_plus_gaussian_testbench();
     // 3. valid-ready = 01
     // 4. valid-ready = 11 (both random)
 
+	// img_input_valid
 	always_ff @(posedge ap_clk) begin
         if (cc_counter < 1.5*OUT_ROWS*OUT_COLS) begin
             crop_input_TVALID <= 1'b0;
@@ -136,8 +155,17 @@ module crop_plus_gaussian_testbench();
         end
 	end
 
-	// output-ready
+	// crop_Y1_TVALID
+    always_ff @(posedge ap_clk) begin
+        crop_Y1_TVALID <= 1'b1;
+    end
 
+    // crop_X1_TVALID
+    always_ff @(posedge ap_clk) begin
+        crop_X1_TVALID <= 1'b1;
+    end
+
+	// output_ready
 	always_ff @(posedge ap_clk) begin
         if (cc_counter < 1.5*OUT_ROWS*OUT_COLS) begin
             cnn_output_0_TREADY <= 1'b0;
@@ -194,6 +222,8 @@ module crop_plus_gaussian_testbench();
 
 	// I/O memory
 	reg [FP_TOTAL-1:0] input_mem [IN_ROWS*IN_COLS-1:0];
+	logic [IMG_ROW_BITWIDTH-1:0] crop_Y1_mem;
+    logic [IMG_COL_BITWIDTH-1:0] crop_X1_mem;
     reg [FP_TOTAL-1:0] output_mem [4:0];
 	logic [FP_TOTAL-1:0] output_benchmark_mem [4:0];
 
@@ -210,7 +240,7 @@ module crop_plus_gaussian_testbench();
 	// File pointers
 	integer input_file, input_read_file, output_file, output_benchmark_file;
 
-	// Sequentially read in input data
+	// Sequentially read in img_input data
 	always_ff @(posedge ap_clk) begin
 		if (~ap_rst_n) begin
 			img_idx <= 0;
@@ -220,6 +250,20 @@ module crop_plus_gaussian_testbench();
 			crop_input_TDATA <= input_mem[img_idx];
 		end	
 	end
+
+	// Sequentially read in crop_Y1 data
+    always_ff @(posedge ap_clk) begin
+        if (crop_Y1_TVALID & crop_Y1_TREADY) begin
+            crop_Y1_TDATA <= crop_Y1_mem; // give data to module
+        end
+    end
+
+    // Sequentially read in crop_X1 data
+    always_ff @(posedge ap_clk) begin
+        if (crop_X1_TVALID & crop_X1_TREADY) begin
+            crop_X1_TDATA <= crop_X1_mem; // give data to module
+        end
+    end
 	
 	// Sequentially read out output data
 	always_ff @(posedge ap_clk) begin
@@ -267,16 +311,20 @@ module crop_plus_gaussian_testbench();
 
 		//////////////////////// 1. Load input and benchmark data ////////////////////////
 	    
-		// input data
-		
+		// img_input data
 		$readmemb(input_file_location, input_mem);
+
+		// crop_Y1 data
+		crop_Y1_mem = 'd10;
+
+		// crop_X1 data
+		crop_X1_mem = 'd10;
 
 		// Output benchmark, against which to compare for assertions
 		$readmemb(output_benchmark_file_location, output_benchmark_mem);
 
 		//////////////////////// 2. Wait for computation to complete ////////////////////////
 
-        ap_start = 0; // start off to begin
 		repeat(3) begin
 
 		    // toggle ~ap_rst_n
