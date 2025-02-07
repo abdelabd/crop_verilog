@@ -252,9 +252,8 @@ module crop_plus_fifo_testbench();
 
                 // 4. Run computation a few times
                 repeat(10) begin
-                    reset <= 1'b1;  #(CLOCK_PERIOD*2); reset <= 1'b0; 
-                    wait(finished);
-                    run_counter <= run_counter + 1;
+                    @(posedge clk) reset <= 1'b1;  @(posedge clk) reset <= 1'b0; 
+                    @(posedge finished) run_counter <= run_counter + 1;
                 end
 
                 // 5. Save output
