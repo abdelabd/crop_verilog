@@ -231,7 +231,7 @@ module crop_filter_testbench();
                         IN_ROWS, IN_COLS,
                         OUT_ROWS, OUT_COLS, NUM_CROPS,
                         Y1_range[jj], X1_range[kk]);
-                $display("output_file_location = %0d\n", output_file_location);
+                $display("output_file_location = %0d", output_file_location);
                 output_file = $fopen(output_file_location, "wb");
                 if (output_file == 0) begin
                     $display("Error: Could not open output file for writing.");

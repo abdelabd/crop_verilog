@@ -69,9 +69,9 @@ module crop_filter #(
             y <= 0;
         end 
         else if (idx_incr) begin
-            if (x == IN_COLS-1) begin
-                x <= 0;
-                if (y == IN_ROWS-1) y <= 0;
+            if (x == IN_COLS) begin
+                x <= 1;
+                if (y == IN_ROWS+1) y <= 1;
                 else y <= y + 1;
             end 
             else  x <= x + 1;
