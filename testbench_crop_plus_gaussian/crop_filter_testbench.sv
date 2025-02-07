@@ -180,7 +180,7 @@ module crop_filter_testbench();
 		end	
 	end
 
-    integer run_counter;
+    integer run_counter = 0;
     initial begin
         $display("\ninput_file_location = %0d", input_file_location);
         $display("input_read_file_location = %0d", input_read_file_location);
@@ -218,12 +218,11 @@ module crop_filter_testbench();
                 $readmemb(output_benchmark_file_location, output_benchmark_mem);
 
                 // 4. Run computation a few times
-                // repeat(10) begin
+                repeat(10) begin
                     reset <= 1'b1;  #(CLOCK_PERIOD*2); reset <= 1'b0; 
                     wait(finished);
                     run_counter <= run_counter + 1;
-                    $display("Run %0d complete", run_counter);
-                // end
+                end
 
                 // 5. Save output
                 output_file_location = $sformatf("tb_data/ap_fixed_%0d_%0d/%0dx%0d_to_%0dx%0dx%0d/Y1_%0d/X1_%0d/cropfilter_out.bin",
@@ -250,7 +249,7 @@ module crop_filter_testbench();
 
         
         //////////////////////// 6. End sim ////////////////////////
-
+        $display("[INFO] Total runs: %0d", run_counter);
         $display("[TB] Simulation complete.");
         $stop;
     end
