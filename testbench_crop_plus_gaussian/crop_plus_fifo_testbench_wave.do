@@ -2,10 +2,10 @@ onerror {resume}
 quietly WaveActivateNextPane {} 0
 add wave -noupdate /crop_plus_fifo_testbench/reset
 add wave -noupdate /crop_plus_fifo_testbench/clk
-add wave -noupdate /crop_plus_fifo_testbench/input_mem
 add wave -noupdate /crop_plus_fifo_testbench/idx_in
 add wave -noupdate /crop_plus_fifo_testbench/idx_out
 add wave -noupdate /crop_plus_fifo_testbench/last_idx_out
+add wave -noupdate /crop_plus_fifo_testbench/img_input_mem
 add wave -noupdate /crop_plus_fifo_testbench/output_mem
 add wave -noupdate /crop_plus_fifo_testbench/output_benchmark_mem
 add wave -noupdate -label dut::fifo::count /crop_plus_fifo_testbench/dut/fifo_sync_inst/count
