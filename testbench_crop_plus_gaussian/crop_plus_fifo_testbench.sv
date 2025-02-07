@@ -14,6 +14,8 @@ module crop_plus_fifo_testbench();
     localparam IMG_ROW_BITWIDTH = 10;
     localparam IMG_COL_BITWIDTH = 10;
     localparam NUM_CROPS       = 1; 
+    int Y1_range [2:0] = '{0, 37, 52};
+    int X1_range [2:0] = '{0, 59, 112};
 
     //////////////////////// DUT signals ////////////////////////
     reg                         clk;
@@ -128,24 +130,14 @@ module crop_plus_fifo_testbench();
 
     string input_file_location = $sformatf("tb_data/ap_fixed_%0d_%0d/img_precrop_INDEX_%0dx%0d_to_%0dx%0dx%0d.bin",
             FP_TOTAL, FP_INT,
-            IN_ROWS, IN_COLS,
-            OUT_ROWS, OUT_COLS,
-            NUM_CROPS);
+			IN_ROWS, IN_COLS,
+            OUT_ROWS, OUT_COLS, NUM_CROPS);
     string input_read_file_location = $sformatf("tb_data/ap_fixed_%0d_%0d/img_precrop_INDEX_READIN_%0dx%0d_to_%0dx%0dx%0d.bin",
-            FP_TOTAL, FP_INT,
-            IN_ROWS, IN_COLS,
-            OUT_ROWS, OUT_COLS,
-            NUM_CROPS);
-    string output_benchmark_file_location = $sformatf("tb_data/ap_fixed_%0d_%0d/img_postcrop_INDEX_%0dx%0d_to_%0dx%0dx%0d.bin",
-            FP_TOTAL, FP_INT,
-            IN_ROWS, IN_COLS,
-            OUT_ROWS, OUT_COLS,
-            NUM_CROPS);
-    string output_file_location = $sformatf("tb_data/ap_fixed_%0d_%0d/crop_pred_INDEX_%0dx%0d_to_%0dx%0dx%0d.bin",
-            FP_TOTAL, FP_INT,
-            IN_ROWS, IN_COLS,
-            OUT_ROWS, OUT_COLS,
-            NUM_CROPS);
+		    FP_TOTAL, FP_INT,
+			IN_ROWS, IN_COLS,
+            OUT_ROWS, OUT_COLS, NUM_CROPS);
+    string output_benchmark_file_location;
+    string output_file_location;
 
 
     // I/O memory
@@ -154,7 +146,6 @@ module crop_plus_fifo_testbench();
     logic [IMG_COL_BITWIDTH-1:0] crop_X1_mem;
     logic [FP_TOTAL-1:0] output_mem [OUT_ROWS*OUT_COLS-1:0];
     logic [FP_TOTAL-1:0] output_benchmark_mem [OUT_ROWS*OUT_COLS-1:0];
-    
     logic [FP_TOTAL-1:0] output_mem_refresh  [OUT_ROWS*OUT_COLS-1:0];
     genvar ii;
     for (ii=0; ii<OUT_ROWS*OUT_COLS; ii++) begin
@@ -223,71 +214,74 @@ module crop_plus_fifo_testbench();
     // Run through signal protocol to run module
     integer run_counter = 0;
     initial begin
-
         $display("\ninput_file_location = %0d", input_file_location);
-        $display("output_benchmark_file_location = %0d", output_benchmark_file_location);
         $display("input_read_file_location = %0d", input_read_file_location);
-        $display("output_file_location = %0d\n", output_file_location);
         
-
-        //////////////////////// 1. Load input and benchmark data ////////////////////////
-
+        
+        //////////////////////// 1. Load input ////////////////////////
+	   
         // img_input data
         $readmemb(input_file_location, img_input_mem);
-
-        // crop_Y1 data
-        crop_Y1_mem = 'd10;
-
-        // crop_X1 data
-        crop_X1_mem = 'd10;
- 
-        // Output benchmark, against which to compare for assertions
-        $readmemb(output_benchmark_file_location, output_benchmark_mem);
-
-        //////////////////////// 2. Wait for computation to complete ////////////////////////
-
-        // Let's run it several times
-        repeat(10) begin 
-            reset <= 1'b1; #(CLOCK_PERIOD); reset <= 1'b0; 
-            wait(finished);
-            run_counter <= run_counter + 1;
-        end
-
-        //////////////////////// 3. Save output, close files ////////////////////////
-        // Input-read
-        
         input_read_file = $fopen(input_read_file_location, "wb");
         if (input_read_file == 0) begin
             $display("\n\nError: Could not open input-read file for writing.");
             $stop;
         end
-        else begin
-            $display("\n\nCould indeed open input-read file for writing.");
-        end
         for (i=0; i<IN_ROWS*IN_COLS; i=i+1) begin
             $fwrite(input_read_file, "%b\n", img_input_mem[i]);
         end
-
-        // Output
-        output_file = $fopen(output_file_location, "wb");
-        if (output_file == 0) begin
-            $display("Error: Could not open output file for writing.");
-            $stop;
-        end
-        else begin
-            $display("Could indeed open output file for writing.");
-        end
-        for (i=0; i<OUT_ROWS*OUT_COLS; i=i+1) begin
-            $fwrite(output_file, "%b\n", output_mem[i]);
-        end
-        
-
         $fclose(input_read_file);
-        $fclose(output_file);
-        
-        //////////////////////// 4. End sim ////////////////////////
-        
-        $display("\n\n[INFO] Total runs = %0d", run_counter+1);
+
+        //////////////////////// 2. Iterate through different crop regions ////////////////////////
+        foreach(Y1_range[jj]) begin
+            crop_Y1_mem = Y1_range[jj];
+
+            foreach(X1_range[kk]) begin 
+                crop_X1_mem = X1_range[kk];
+                run_counter = 0;
+                $display("\n\n(Y1, X1) = (%0d, %0d)...", Y1_range[jj], X1_range[kk]);
+
+                // 3. Load benchmark data for comparison
+                output_benchmark_file_location = $sformatf("tb_data/ap_fixed_%0d_%0d/%0dx%0d_to_%0dx%0dx%0d/Y1_%0d/X1_%0d/img_postcrop_INDEX.bin",
+                        FP_TOTAL, FP_INT,
+                        IN_ROWS, IN_COLS,
+                        OUT_ROWS, OUT_COLS, NUM_CROPS,
+                        Y1_range[jj], X1_range[kk]);
+                $display("output_benchmark_file_location = %0d", output_benchmark_file_location);
+                $readmemb(output_benchmark_file_location, output_benchmark_mem);
+
+                // 4. Run computation a few times
+                repeat(10) begin
+                    reset <= 1'b1;  #(CLOCK_PERIOD*2); reset <= 1'b0; 
+                    wait(finished);
+                    run_counter <= run_counter + 1;
+                end
+
+                // 5. Save output
+                output_file_location = $sformatf("tb_data/ap_fixed_%0d_%0d/%0dx%0d_to_%0dx%0dx%0d/Y1_%0d/X1_%0d/cropfilter_out.bin",
+                        FP_TOTAL, FP_INT,
+                        IN_ROWS, IN_COLS,
+                        OUT_ROWS, OUT_COLS, NUM_CROPS,
+                        Y1_range[jj], X1_range[kk]);
+                $display("output_file_location = %0d", output_file_location);
+                output_file = $fopen(output_file_location, "wb");
+                if (output_file == 0) begin
+                    $display("Error: Could not open output file for writing.");
+                    $stop;
+                end
+                for (i=0; i<OUT_ROWS*OUT_COLS; i=i+1) begin
+                    $fwrite(output_file, "%b\n", output_mem[i]);
+                end
+                $fclose(output_file);
+
+                $display("(Y1, X1) = (%0d, %0d) complete", Y1_range[jj], X1_range[kk]);
+
+            end
+
+        end
+
+        //////////////////////// 6. End sim ////////////////////////
+        $display("[INFO] Total runs: %0d", run_counter);
         $display("\n\n[TB] Simulation complete.");
         $stop;
     end
