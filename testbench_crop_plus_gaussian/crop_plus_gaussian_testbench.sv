@@ -157,12 +157,12 @@ module crop_plus_gaussian_testbench();
 
 	// crop_Y1_TVALID
     always_ff @(posedge ap_clk) begin
-        crop_Y1_TVALID <= 1'b1;
+        crop_Y1_TVALID <= $urandom%2;
     end
 
     // crop_X1_TVALID
     always_ff @(posedge ap_clk) begin
-        crop_X1_TVALID <= 1'b1;
+        crop_X1_TVALID <= $urandom%2;
     end
 
 	// output_ready

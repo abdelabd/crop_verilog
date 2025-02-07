@@ -31,24 +31,30 @@ module crop_filter #(
     //////////////////////// Sequential logic: collect x- and y- coordinates for top-left corner of crop-box ////////////////////////
 
     reg [IMG_ROW_BITWIDTH - 1: 0] Y1;
+    reg one_cc_counter_Y1;
     always @(negedge clk) begin
         if (reset) begin
             crop_Y1_TREADY <= 1'b1; 
+            one_cc_counter_Y1 <= 0;
         end 
         else if (crop_Y1_TVALID && crop_Y1_TREADY) begin
-            crop_Y1_TREADY <= 1'b0;
+            one_cc_counter_Y1 <= one_cc_counter_Y1 + 1;
             Y1 <= crop_Y1_TDATA;
+            if (one_cc_counter_Y1 == 1) crop_Y1_TREADY <= 1'b0;
         end
     end
 
     reg [IMG_COL_BITWIDTH - 1: 0] X1;
+    reg one_cc_counter_X1;
     always @(negedge clk) begin
         if (reset) begin
             crop_X1_TREADY <= 1'b1; 
+            one_cc_counter_X1 <= 0;
         end 
         else if (crop_X1_TVALID && crop_X1_TREADY) begin
-            crop_X1_TREADY <= 1'b0;
+            one_cc_counter_X1 <= one_cc_counter_X1 + 1;
             X1 <= crop_X1_TDATA;
+            if (one_cc_counter_X1 == 1) crop_X1_TREADY <= 1'b0;
         end
     end
 
