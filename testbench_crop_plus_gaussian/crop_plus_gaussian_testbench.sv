@@ -24,9 +24,9 @@ module crop_plus_gaussian_testbench();
 	wire ap_ready; //output
 
 	// Image data input 
-	logic [FP_TOTAL-1:0] crop_input_TDATA; //input
-	logic crop_input_TVALID; //input: data valid to be sent
-    wire crop_input_TREADY; //output: myproject ready to receive data
+	logic [FP_TOTAL-1:0] img_input_TDATA; //input
+	logic img_input_TVALID; //input: data valid to be sent
+    wire img_input_TREADY; //output: myproject ready to receive data
 
 	// crop_Y1 data
 	logic [IMG_ROW_BITWIDTH-1:0] crop_Y1_TDATA; //input
@@ -74,7 +74,7 @@ module crop_plus_gaussian_testbench();
         .IMG_COL_BITWIDTH(IMG_COL_BITWIDTH)
     )
     dut (
-		  .crop_input_TDATA(crop_input_TDATA),
+		  .img_input_TDATA(img_input_TDATA),
 		  .crop_Y1_TDATA(crop_Y1_TDATA),
 		  .crop_X1_TDATA(crop_X1_TDATA),
           .cnn_output_0_TDATA(cnn_output_0_TDATA),
@@ -84,8 +84,8 @@ module crop_plus_gaussian_testbench();
 		  .cnn_output_4_TDATA(cnn_output_4_TDATA),
         .ap_clk(ap_clk),
         .ap_rst_n(ap_rst_n),
-        .crop_input_TVALID(crop_input_TVALID),
-        .crop_input_TREADY(crop_input_TREADY),
+        .img_input_TVALID(img_input_TVALID),
+        .img_input_TREADY(img_input_TREADY),
 
 		.crop_Y1_TVALID(crop_Y1_TVALID),
 		.crop_Y1_TREADY(crop_Y1_TREADY),
@@ -142,16 +142,16 @@ module crop_plus_gaussian_testbench();
 	// img_input_valid
 	always_ff @(posedge ap_clk) begin
         if (cc_counter < 1.5*OUT_ROWS*OUT_COLS) begin
-            crop_input_TVALID <= 1'b0;
+            img_input_TVALID <= 1'b0;
         end
         else if (cc_counter < 3*OUT_ROWS*OUT_COLS) begin
-            crop_input_TVALID <= 1'b1;
+            img_input_TVALID <= 1'b1;
         end
         else if (cc_counter < 4.5*OUT_ROWS*OUT_COLS) begin
-            crop_input_TVALID <= 1'b0;
+            img_input_TVALID <= 1'b0;
         end
         else begin
-            crop_input_TVALID <= $urandom%2;
+            img_input_TVALID <= $urandom%2;
         end
 	end
 
@@ -245,9 +245,9 @@ module crop_plus_gaussian_testbench();
 		if (~ap_rst_n) begin
 			img_idx <= 0;
 		end	
-		else if (crop_input_TVALID & crop_input_TREADY) begin
+		else if (img_input_TVALID & img_input_TREADY) begin
 			img_idx <= img_idx + 1;
-			crop_input_TDATA <= input_mem[img_idx];
+			img_input_TDATA <= input_mem[img_idx];
 		end	
 	end
 

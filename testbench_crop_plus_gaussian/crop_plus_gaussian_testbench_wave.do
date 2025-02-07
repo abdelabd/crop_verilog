@@ -9,9 +9,9 @@ add wave -noupdate /crop_plus_gaussian_testbench/ap_done
 add wave -noupdate /crop_plus_gaussian_testbench/input_mem
 add wave -noupdate /crop_plus_gaussian_testbench/output_mem
 add wave -noupdate /crop_plus_gaussian_testbench/output_benchmark_mem
-add wave -noupdate /crop_plus_gaussian_testbench/crop_input_TVALID
-add wave -noupdate /crop_plus_gaussian_testbench/crop_input_TREADY
-add wave -noupdate /crop_plus_gaussian_testbench/crop_input_TDATA
+add wave -noupdate /crop_plus_gaussian_testbench/img_input_TVALID
+add wave -noupdate /crop_plus_gaussian_testbench/img_input_TREADY
+add wave -noupdate /crop_plus_gaussian_testbench/img_input_TDATA
 add wave -noupdate /crop_plus_gaussian_testbench/cnn_output_4_TVALID
 add wave -noupdate /crop_plus_gaussian_testbench/cnn_output_4_TREADY
 add wave -noupdate /crop_plus_gaussian_testbench/cnn_output_4_TDATA
@@ -27,7 +27,6 @@ add wave -noupdate /crop_plus_gaussian_testbench/cnn_output_1_TDATA
 add wave -noupdate /crop_plus_gaussian_testbench/cnn_output_0_TVALID
 add wave -noupdate /crop_plus_gaussian_testbench/cnn_output_0_TREADY
 add wave -noupdate /crop_plus_gaussian_testbench/cnn_output_0_TDATA
-add wave -noupdate /crop_plus_gaussian_testbench/dut/crop_plus_fifo_inst/crop_filter_inst/pre_DFF_crop_Y1_TREADY
 add wave -noupdate /crop_plus_gaussian_testbench/dut/crop_plus_fifo_inst/crop_filter_inst/crop_Y1_TREADY
 add wave -noupdate /crop_plus_gaussian_testbench/dut/crop_plus_fifo_inst/crop_filter_inst/crop_Y1_TVALID
 add wave -noupdate /crop_plus_gaussian_testbench/dut/crop_plus_fifo_inst/crop_filter_inst/crop_Y1_TDATA

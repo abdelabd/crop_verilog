@@ -7,7 +7,7 @@ module crop_plus_gaussian #( // Has all the same inputs and outputs as myproject
     parameter IMG_ROW_BITWIDTH = 10,
     parameter IMG_COL_BITWIDTH = 10)
     (
-        crop_input_TDATA,
+        img_input_TDATA,
         crop_Y1_TDATA,
         crop_X1_TDATA,
         cnn_output_0_TDATA,
@@ -17,8 +17,8 @@ module crop_plus_gaussian #( // Has all the same inputs and outputs as myproject
         cnn_output_4_TDATA,
         ap_clk,
         ap_rst_n,
-        crop_input_TVALID,
-        crop_input_TREADY,
+        img_input_TVALID,
+        img_input_TREADY,
         crop_Y1_TVALID,
         crop_Y1_TREADY,
         crop_X1_TVALID,
@@ -40,7 +40,7 @@ module crop_plus_gaussian #( // Has all the same inputs and outputs as myproject
     );
 
     // I/O
-    input wire [PIXEL_BIT_WIDTH - 1:0] crop_input_TDATA;
+    input wire [PIXEL_BIT_WIDTH - 1:0] img_input_TDATA;
     input wire [IMG_ROW_BITWIDTH - 1:0] crop_Y1_TDATA;
     input wire [IMG_COL_BITWIDTH - 1:0] crop_X1_TDATA;
     output wire [PIXEL_BIT_WIDTH - 1:0] cnn_output_0_TDATA;
@@ -50,8 +50,8 @@ module crop_plus_gaussian #( // Has all the same inputs and outputs as myproject
     output wire [PIXEL_BIT_WIDTH - 1:0] cnn_output_4_TDATA;
     input wire ap_clk;
     input wire ap_rst_n;
-    input wire crop_input_TVALID;
-    output wire crop_input_TREADY;
+    input wire img_input_TVALID;
+    output wire img_input_TREADY;
     input wire crop_Y1_TVALID;
     output wire crop_Y1_TREADY;
     input wire crop_X1_TVALID;
@@ -89,9 +89,9 @@ module crop_plus_gaussian #( // Has all the same inputs and outputs as myproject
     ) crop_plus_fifo_inst (
         .clk       (ap_clk),
         .reset     (~ap_rst_n),
-        .pixel_in_TDATA  (crop_input_TDATA),
-        .pixel_in_TVALID  (crop_input_TVALID),
-        .pixel_in_TREADY  (crop_input_TREADY),
+        .pixel_in_TDATA  (img_input_TDATA),
+        .pixel_in_TVALID  (img_input_TVALID),
+        .pixel_in_TREADY  (img_input_TREADY),
         .crop_Y1_TDATA  (crop_Y1_TDATA),
         .crop_Y1_TVALID  (crop_Y1_TVALID),
         .crop_Y1_TREADY  (crop_Y1_TREADY),
