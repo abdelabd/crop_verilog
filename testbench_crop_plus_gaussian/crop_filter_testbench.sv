@@ -75,12 +75,12 @@ module crop_filter_testbench();
 
     // crop_Y1_TVALID
 	always_ff @(posedge clk) begin
-		crop_Y1_TVALID <= 1'b1;
+		crop_Y1_TVALID <= $urandom%2;
 	end
 
     // crop_X1_TVALID
 	always_ff @(posedge clk) begin
-		crop_X1_TVALID <= 1'b1;
+		crop_X1_TVALID <= $urandom%2;
 	end
 
 	// pixel_out_TREADY
@@ -112,7 +112,9 @@ module crop_filter_testbench();
             NUM_CROPS);
     
     // I/O memory
-    logic [FP_TOTAL-1:0] input_mem  [IN_ROWS*IN_COLS-1:0];
+    logic [FP_TOTAL-1:0] img_input_mem  [IN_ROWS*IN_COLS-1:0];
+    logic [IMG_ROW_BITWIDTH-1:0] crop_Y1_mem;
+    logic [IMG_COL_BITWIDTH-1:0] crop_X1_mem;
     logic [FP_TOTAL-1:0] output_mem [OUT_ROWS*OUT_COLS-1:0];
     logic [FP_TOTAL-1:0] output_benchmark_mem [OUT_ROWS*OUT_COLS-1:0];
     logic [FP_TOTAL-1:0] output_mem_refresh  [OUT_ROWS*OUT_COLS-1:0];
@@ -130,7 +132,7 @@ module crop_filter_testbench();
     // File pointers
     integer input_file, input_read_file, output_file, output_benchmark_file;
 
-    // Sequentially read in input data
+    // Sequentially read in img_input data
 	always_ff @(posedge clk) begin
 		if (reset) begin
             last_idx_in <= 0;
@@ -140,7 +142,7 @@ module crop_filter_testbench();
 		else if (pixel_in_TREADY & pixel_in_TVALID) begin
             last_idx_in <= idx_in;
 			idx_in <= idx_in + 1;
-			pixel_in_TDATA <= input_mem[idx_in]; // give data to module
+			pixel_in_TDATA <= img_input_mem[idx_in]; // give data to module
 
             if (idx_in == IN_ROWS*IN_COLS-1) begin
                 finished <= 1'b1;
@@ -150,6 +152,20 @@ module crop_filter_testbench();
             assert((idx_in != last_idx_in)|(idx_in==0)); // exception for first cycle because of indexing
 		end	
 	end
+
+    // Sequentially read in crop_Y1 data
+    always_ff @(posedge clk) begin
+        if (crop_Y1_TVALID & crop_Y1_TREADY) begin
+            crop_Y1_TDATA <= crop_Y1_mem; // give data to module
+        end
+    end
+
+    // Sequentially read in crop_X1 data
+    always_ff @(posedge clk) begin
+        if (crop_X1_TVALID & crop_X1_TREADY) begin
+            crop_X1_TDATA <= crop_X1_mem; // give data to module
+        end
+    end
 
     // Sequentially read out output data
 	always_ff @(posedge clk) begin
@@ -174,9 +190,6 @@ module crop_filter_testbench();
     integer run_counter = 0;
     initial begin
 
-        crop_Y1_TDATA <= 'd10;
-        crop_X1_TDATA <= 'd10;
-
         $display("\ninput_file_location = %0d", input_file_location);
 		$display("output_benchmark_file_location = %0d", output_benchmark_file_location);
 		$display("input_read_file_location = %0d", input_read_file_location);
@@ -184,8 +197,14 @@ module crop_filter_testbench();
 
         //////////////////////// 1. Load input and benchmark data ////////////////////////
 	    
-        // input data
-        $readmemb(input_file_location, input_mem);
+        // img_input data
+        $readmemb(input_file_location, img_input_mem);
+
+        // crop_Y1 data
+        crop_Y1_mem = 'd10;
+
+        // crop_X1 data
+        crop_X1_mem = 'd10;
 
         // output benchmark data
         $readmemb(output_benchmark_file_location, output_benchmark_mem);
@@ -210,7 +229,7 @@ module crop_filter_testbench();
             $display("Could indeed open input-read file for writing.");
         end
         for (i=0; i<IN_ROWS*IN_COLS; i=i+1) begin
-            $fwrite(input_read_file, "%b\n", input_mem[i]);
+            $fwrite(input_read_file, "%b\n", img_input_mem[i]);
         end
 
         // Output
