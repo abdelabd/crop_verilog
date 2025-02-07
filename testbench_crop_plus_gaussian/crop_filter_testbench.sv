@@ -137,7 +137,7 @@ module crop_filter_testbench();
 			idx_in <= idx_in + 1;
 			pixel_in_TDATA <= img_input_mem[idx_in]; // give data to module
 
-            if (idx_in == IN_ROWS*IN_COLS-1) begin
+            if (idx_in == IN_ROWS*IN_COLS) begin
                 finished <= 1'b1;
             end
 
