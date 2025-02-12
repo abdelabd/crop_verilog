@@ -32,7 +32,7 @@ module crop_filter #(
 
     reg [IMG_ROW_BITWIDTH - 1: 0] Y1;
     reg one_cc_counter_Y1;
-    always @(negedge clk) begin
+    always @(posedge clk) begin
         if (reset) begin
             crop_Y1_TREADY <= 1'b1; 
             one_cc_counter_Y1 <= 0;
@@ -46,7 +46,7 @@ module crop_filter #(
 
     reg [IMG_COL_BITWIDTH - 1: 0] X1;
     reg one_cc_counter_X1;
-    always @(negedge clk) begin
+    always @(posedge clk) begin
         if (reset) begin
             crop_X1_TREADY <= 1'b1; 
             one_cc_counter_X1 <= 0;
